@@ -24,9 +24,6 @@ extern "C" {
 #endif
     
     static inline int POS(int x) { return 1 << (x-1); }
-    static inline unsigned char CRD(int i, int j) { return (i << 4) + j + 1; }
-    static inline int X(unsigned char c) { return c >> 4; }
-    static inline int Y(unsigned char c) { return (c-1) % 16; }
     static inline int GETSQR(int i, int j) { return SQR * (int)(i/SQR) + (int)(j/SQR); }
     
     typedef struct {

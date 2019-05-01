@@ -6,7 +6,8 @@
                    projectFiles="true">
       <itemPath>board.h</itemPath>
       <itemPath>checker.h</itemPath>
-      <itemPath>main.h</itemPath>
+      <itemPath>generator.h</itemPath>
+      <itemPath>grader.h</itemPath>
       <itemPath>solver.h</itemPath>
       <itemPath>tests.h</itemPath>
     </logicalFolder>
@@ -19,6 +20,8 @@
                    projectFiles="true">
       <itemPath>board.c</itemPath>
       <itemPath>checker.c</itemPath>
+      <itemPath>generator.c</itemPath>
+      <itemPath>grader.c</itemPath>
       <itemPath>main.c</itemPath>
       <itemPath>solver.c</itemPath>
       <itemPath>Tests/testBoard.c</itemPath>
@@ -61,9 +64,15 @@
       </item>
       <item path="checker.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="main.c" ex="false" tool="0" flavor2="0">
+      <item path="generator.c" ex="false" tool="0" flavor2="0">
       </item>
-      <item path="main.h" ex="false" tool="3" flavor2="0">
+      <item path="generator.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="grader.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="grader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="solver.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -103,9 +112,15 @@
       </item>
       <item path="checker.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="main.c" ex="false" tool="0" flavor2="0">
+      <item path="generator.c" ex="false" tool="0" flavor2="0">
       </item>
-      <item path="main.h" ex="false" tool="3" flavor2="0">
+      <item path="generator.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="grader.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="grader.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="solver.c" ex="false" tool="0" flavor2="0">
       </item>

@@ -20,24 +20,16 @@
 extern "C" {
 #endif
 
+    static inline int GET_VAL(unsigned int c) { return (c-1) >> 8; }
+    static inline int GET_X(unsigned int c) { return (c-1) % 16; }
+    static inline int GET_Y(unsigned int c) { return ((c-1) & 240) >> 4; }
+    static inline int SET_VAL(int i, int j, int k) { return (k << 8) + (i << 4) + j + 1; }
     
     void calculatePossible(Board *board);
+    void depthFS(Board *board);
     
-    unsigned char* findForced(Board board);
-    void setForced(Board *board, unsigned char *forced);
-    
-    void fillRows(Board *board);
-    void fillCols(Board *board);
-    void fillSqrs(Board *board);
-    
-    void solve(Board *board);
-    
-    // Auxiliary functions
-    void alloc2Dints(const int a, int **arr);
-    void alloc2Duchars(const int a, unsigned char **arr);
-    void findPossibilities(Board board, int **c, unsigned char **pos, int (*f)(int,int));
-    void fillUnique(Board *board, const int a, int **c, unsigned char **pos);
-
+    void feedforward(Board *board, unsigned int *c, int *index);
+    void backpropagation(Board *board, unsigned int *c, int *index);
 
 #ifdef __cplusplus
 }

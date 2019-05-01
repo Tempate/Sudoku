@@ -10,7 +10,6 @@
 #include <math.h>
 #include <time.h>
 
-#include "main.h"
 #include "board.h"
 
 
@@ -71,7 +70,7 @@ void printBoard(Board board) {
             if (board.values[i][j] == 0) {
                 printf("   ");
             } else {
-                printf(" %d ", board.values[i][j]);
+                printf(" %hhu ", board.values[i][j]);
             }
         }
         printf("\n");

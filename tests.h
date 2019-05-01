@@ -21,16 +21,13 @@ extern "C" {
     void testNewBoard(void);
     void testChecker(void);
     void testPossible(void);
-    void testForced(void);
     
-    void testFillers1(void);
-    void testFillers2(void);
-    void testFillers3(void);
-    
-    void testSolver1(void);
-    void testSolver2(void);
-    void testSolver3(void);
-    void testSolver4(void);
+    void testBFS1(void);
+    void testBFS2(void);
+    void testBFS3(void);
+    void testBFS4(void);
+    void testBFS5(void);
+    void testBFS6(void);
 
 #ifdef __cplusplus
 }

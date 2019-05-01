@@ -5,25 +5,26 @@
  */
 
 /* 
- * File:   main.h
+ * File:   grader.h
  * Author: alpha
  *
- * Created on April 27, 2019, 7:46 PM
+ * Created on May 1, 2019, 12:11 AM
  */
 
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef GRADER_H
+#define GRADER_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-    
-
+    double grade(Board board);
+    int numberOfGivens(Board board);
+    int lowestBoundRowsCols(Board board);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* MAIN_H */
+#endif /* GRADER_H */
 

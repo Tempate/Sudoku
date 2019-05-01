@@ -16,7 +16,6 @@
 #include <time.h>
 #include <math.h>
 
-#include "main.h"
 #include "tests.h"
 #include "solver.h"
 
@@ -24,7 +23,7 @@ int main(int argc, char** argv) {
     
     srand(time(NULL));
     
-    testSolver4();
+    testBFS5();
     
     return (EXIT_SUCCESS);
 }

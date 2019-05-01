@@ -38,6 +38,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/Tests/testBoard.o \
 	${OBJECTDIR}/board.o \
 	${OBJECTDIR}/checker.o \
+	${OBJECTDIR}/generator.o \
+	${OBJECTDIR}/grader.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/solver.o
 
@@ -80,6 +82,16 @@ ${OBJECTDIR}/checker.o: checker.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -g -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/checker.o checker.c
+
+${OBJECTDIR}/generator.o: generator.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/generator.o generator.c
+
+${OBJECTDIR}/grader.o: grader.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/grader.o grader.c
 
 ${OBJECTDIR}/main.o: main.c
 	${MKDIR} -p ${OBJECTDIR}

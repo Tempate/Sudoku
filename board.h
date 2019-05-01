@@ -17,8 +17,8 @@
 #define HEIGHT 9
 #define WIDTH 9
 #define RANGE 9
-#define ALL (unsigned int)((1<<(RANGE))-1)  //J
-#define SUM (RANGE*(RANGE+1))/2             //J
+#define ALL (unsigned int)((1<<(RANGE))-1)
+#define SUM (RANGE*(RANGE+1))/2  
 #define SQR 3
 
 #ifdef __cplusplus
@@ -31,7 +31,13 @@ extern "C" {
     typedef struct {
         unsigned char values[HEIGHT][WIDTH];
         unsigned int possible[HEIGHT][WIDTH];
-        //unsigned int remeaning[]; //J, nothing implemented thus far, use this to improve the speed of the "for(i) for(j) if([i][j] == 0)" loops
+
+        /*
+        remeaning is an array which has the indices of all tiles which have value 0 
+        Even though the array is const, we only care about the members up to remLen. Initialize it to all -1s
+        */
+        int remeaning[HEIGHT*WIDTH];
+        int remLen;
     } Board;
     
     Board blankBoard(void);
@@ -39,6 +45,7 @@ extern "C" {
     Board randomBoard(void);
     Board duplicateBoard(Board *b);
     
+    void updateRemeaning(Board *board);
     void printBoard(Board board);
     void printPossible(Board board);
 

@@ -53,10 +53,8 @@ void calculatePossible(Board *board) {
     }
 }
 
-//J
 //Call this instead of calculatePossible when the value of a tile is changed
 //This function removes 'val' from possible in the row, col and sqr
-//PRE: board->values[x][y] != 0
 void updateTileAdded(Board *board, int y, int x){
     unsigned int val = ALL ^ POS(board->values[y][x]);
     board->possible[y][x] = 0;
@@ -72,8 +70,8 @@ void updateTileAdded(Board *board, int y, int x){
             board->possible[i][x] &= val;
     }
 
-    int offsetX = (int)SQR*(x / SQR), offsetY = (int)SQR*(y / SQR);
     //Update sqrs
+    int offsetX = (int)SQR*(x / SQR), offsetY = (int)SQR*(y / SQR);
     for (int i = offsetY; i < offsetY + SQR; ++i){
         for (int j = offsetX; j < offsetX + SQR; ++j){
             if (board->values[i][j] == 0) 
@@ -82,7 +80,6 @@ void updateTileAdded(Board *board, int y, int x){
     }
 }
 
-//J
 //temp is there because if the value is set to 0, it would be impossible to retrieve
 void updateTileRemoved(Board *board, unsigned char temp, int y, int x){
     unsigned int val = POS(temp);
@@ -121,7 +118,7 @@ void updateTileRemoved(Board *board, unsigned char temp, int y, int x){
 void depthFS(Board *board) {
     unsigned int *c = (unsigned int *) malloc(HEIGHT * WIDTH * sizeof(int *));
     int index = 0;
-    int x, y;   //J
+    int x, y;
 
     FEEDFORWARD:
     calculatePossible(board);
@@ -186,5 +183,5 @@ void depthFS(Board *board) {
         printf("[-] The solution found has errors.");
         exit(1);
     }
-    printf("Calls to calculatePossible: %d\n", called); //J
+    printf("Calls to calculatePossible: %d\n", called);
 }

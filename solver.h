@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
     static inline int GET_VAL(unsigned int c) { return (c-1) >> 8; }
-    static inline int GET_X(unsigned int c) { return (c-1) & 15; } //J
+    static inline int GET_X(unsigned int c) { return (c-1) & 15; }
     static inline int GET_Y(unsigned int c) { return ((c-1) & 240) >> 4; }
     static inline int SET_VAL(int i, int j, int k) { return (k << 8) + (i << 4) + j + 1; }
     

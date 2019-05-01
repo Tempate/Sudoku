@@ -8,9 +8,9 @@
 #include <math.h>
 #include "board.h"
 
-//J
+
 bool checkBoard(Board board) {
-    //In a solved sudoku, all the numbers add to 45 in a row / col / sqr
+    //In a solved sudoku, all the numbers add to 45 in each row / col / sqr
     int pos, row, col, sqr;
     
     // Checks to see if all rows match

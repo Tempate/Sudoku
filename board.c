@@ -77,6 +77,30 @@ Board duplicateBoard(Board *b){
     return *newB;
 }
 
+void updateRemeaning(Board *board){
+    //TODO: if we want to use unsigned int, instead of -1 use MAXINDEX + 1,
+    //so that there are no collisions (i dont understand how the indices work that well)
+    int nums = 0;
+    int newA[WIDTH*HEIGHT];
+    //Detect the number of elements and copy them to the temp array
+    for (int i = 0; i < board->remLen; ++i){
+        if (board->remeaning[i] != -1)
+            newA[nums++] = board->remeaning[i];
+    }
+    
+    if (nums != board->remLen){
+        //Copy the elements back to the array
+        for (int i = 0; i < nums; ++i)
+            board->remeaning[i] = newA[i];
+
+        //Set the rest of elems to -1 (not really necessary)
+        for (int i = nums; i < WIDTH*HEIGHT; ++i)
+            board->remeaning[i] = -1;
+
+        board->remLen = nums;
+    }
+}
+
 void printBoard(Board board) {
     printf("Board values: \n");
     printf("---------------------------\n");
@@ -118,4 +142,3 @@ void printPossible(Board board) {
         }
     }
 }
-

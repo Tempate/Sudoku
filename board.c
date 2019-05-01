@@ -61,6 +61,22 @@ Board randomBoard(void) {
     return *board;
 }
 
+Board duplicateBoard(Board *b){
+    Board *newB = malloc(sizeof(Board));
+
+    //TODO: Improve this using std::copy
+    for (int i = 0; i < HEIGHT; ++i)
+    {
+        for (int j = 0; j < WIDTH; ++j)
+        {
+            newB->values[i][j] = b->values[i][j];
+            newB->possible[i][j] = b->possible[i][j];
+        }
+    }
+
+    return *newB;
+}
+
 void printBoard(Board board) {
     printf("Board values: \n");
     printf("---------------------------\n");

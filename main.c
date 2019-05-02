@@ -24,7 +24,11 @@ int main(int argc, char** argv) {
     
     srand(time(NULL));
     
-    testDFS5();
+    time_t start = clock();
+    for (int i = 0; i < 100; i++) {
+        testDFS5();
+    }
+    printf("Took: %ld\n", clock() - start);
     
     return (EXIT_SUCCESS);
 }

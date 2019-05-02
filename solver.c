@@ -15,6 +15,7 @@
 
 #define SQRS WIDTH * HEIGHT / (SQR * SQR)
 
+
 // Calculates the possible values inside of certain squares
 void calculatePossible(Board *board) {
     unsigned int rows[HEIGHT] = {0}, cols[WIDTH] = {0}, sqrs[SQRS] = {0};
@@ -56,19 +57,16 @@ void updateTileAdded(Board *board, const int y, const int x) {
     int x0 = SQR*(int)(x/SQR), y0 = SQR*(int)(y/SQR);
     board->possible[y][x] = 0;
     
-    // Update rows
     for (int j = 0; j < WIDTH; j++){
         if (board->values[y][j] == 0)
             board->possible[y][j] &= val;
     }
 
-    // Update cols
     for (int i = 0; i < HEIGHT; i++){
         if (board->values[i][x] == 0) 
             board->possible[i][x] &= val;
     }
     
-    // Update sqrs
     for (int i = y0; i < y0 + SQR; i++){
         for (int j = x0; j < x0 + SQR; j++){
             if (board->values[i][j] == 0) 
@@ -82,9 +80,10 @@ void depthFS(Board *board) {
     char index = 0, val, x, y;
     
     
+    calculatePossible(board);
+    
     FEEDFORWARD:
     
-    calculatePossible(board);
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             if (board->values[i][j] == 0) {

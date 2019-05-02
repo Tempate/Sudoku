@@ -157,9 +157,9 @@ void testDFS5(void) {
     
     Board board = filledBoard(values);
     
-    printBoard(board);
+    //printBoard(board);
     depthFS(&board);
-    printBoard(board);
+    //printBoard(board);
 }
 
 void testDFS6(void) {

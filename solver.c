@@ -76,7 +76,7 @@ void updateTileAdded(Board *board, const int y, const int x) {
 }
 
 long depthFS(Board *board) {
-    unsigned short *c = malloc(HEIGHT * WIDTH * sizeof(short));
+    unsigned short c[HEIGHT*WIDTH];
     char index = 0, val, x, y;
     long count = 0;
     
@@ -91,7 +91,7 @@ long depthFS(Board *board) {
                 if (board->possible[i][j] == 0) {
                     goto BACKPROPAGATION;
                 } else {
-                    addNextPossibleValue(board, &index, c, 0, i, j);
+                    addNextPossibleValue(board, &index, &c[0], 0, i, j);
                 }
             }
         }
@@ -115,7 +115,7 @@ long depthFS(Board *board) {
             calculatePossible(board);
         } while ((1 << val) > board->possible[y][x]);
         
-        addNextPossibleValue(board, &index, c, val, y, x);
+        addNextPossibleValue(board, &index, &c[0], val, y, x);
         goto FEEDFORWARD;
     } else if (!checkBoard(*board)) {
         printf("[-] The solution found has errors.");
@@ -126,15 +126,27 @@ long depthFS(Board *board) {
 }
 
 void addNextPossibleValue(Board *board, char *index, unsigned short *c, const char start, const char i, const char j) {
-    for (int k = start; k < RANGE; k++) {
-        if (VAL_IN_BYTE(board->possible[i][j], k)) {
-            c[*index] = (unsigned short) SET_VAL(i,j,k+1);
-            board->values[i][j] = k+1;
-
-            updateTileAdded(board,i,j);
-
-            (*index)++;
-            return;
+    if (__builtin_popcount(board->possible[i][j]) == 1) {
+        changeValue(board, index, c, i, j, getForced(board->possible[i][j]));
+    } else {
+        for (int k = start; k < RANGE; k++) {
+            if (VAL_IN_BYTE(board->possible[i][j], k)) {
+                changeValue(board, index, c, i, j, k+1);
+                return;
+            }
         }
     }
+}
+
+void changeValue(Board *board, char *index, unsigned short *c, const int i, const int j, const int k) {
+    c[*index] = (unsigned short) SET_VAL(i,j,k);
+    board->values[i][j] = k;
+    updateTileAdded(board,i,j);
+    (*index)++;
+}
+
+int getForced(unsigned short index) {
+    int val = 1;
+    while (index >>= 1) ++val;
+    return val;
 }

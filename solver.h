@@ -34,6 +34,8 @@ extern "C" {
     
     long depthFS(Board *board);
     void addNextPossibleValue(Board *board, char *index, unsigned short *c, const char start, const char i, const char j);
+    void changeValue(Board *board, char *index, unsigned short *c, const int i, const int j, const int k);
+    int getForced(unsigned short index);
     
 #ifdef __cplusplus
 }

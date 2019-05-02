@@ -68,7 +68,6 @@ int lowestBoundRowsCols(Board board) {
 
 int treeLength(Board board) {
     long count = depthFS(&board);
-    printf("[*] Count: %ld\n", count);
     
     if (count <= 100) {
         return 1;

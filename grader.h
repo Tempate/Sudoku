@@ -21,6 +21,7 @@ extern "C" {
     double grade(Board board);
     int numberOfGivens(Board board);
     int lowestBoundRowsCols(Board board);
+    int treeLength(Board board);
 
 #ifdef __cplusplus
 }

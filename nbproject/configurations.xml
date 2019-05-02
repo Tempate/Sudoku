@@ -49,6 +49,7 @@
       <compileType>
         <cTool>
           <standard>10</standard>
+          <commandLine>-O3 -p -pg</commandLine>
         </cTool>
         <linkerTool>
           <commandLine>-lm</commandLine>

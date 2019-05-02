@@ -17,13 +17,16 @@
 #include <math.h>
 
 #include "tests.h"
+#include "board.h"
 #include "solver.h"
 
 int main(int argc, char** argv) {
     
     srand(time(NULL));
     
-    testBFS5();
+    time_t start = clock();
+    testDFS3();
+    printf("Took: %ld\n", clock() - start);
     
     return (EXIT_SUCCESS);
 }

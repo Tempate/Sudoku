@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
 
 #include "board.h"
 
@@ -20,7 +21,7 @@ Board blankBoard(void) {
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             board->values[i][j] = 0;
-            board->possible[i][j] = (int) pow(2, RANGE) - 1;
+            board->possible[i][j] = SIZE;
         }
     }
     
@@ -59,6 +60,17 @@ Board randomBoard(void) {
     }
     
     return *board;
+}
+
+Board duplicateBoard(Board board){
+    Board *newBoard = malloc(sizeof(Board));
+    
+    for (int i = 0; i < HEIGHT; i++) {
+        memcpy(newBoard->values[i], board.values[i], WIDTH * sizeof(char));
+        memcpy(newBoard->possible[i], board.possible[i], WIDTH * sizeof(int));
+    }
+
+    return *newBoard;
 }
 
 void printBoard(Board board) {

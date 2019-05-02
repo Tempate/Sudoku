@@ -22,12 +22,12 @@ extern "C" {
     void testChecker(void);
     void testPossible(void);
     
-    void testBFS1(void);
-    void testBFS2(void);
-    void testBFS3(void);
-    void testBFS4(void);
-    void testBFS5(void);
-    void testBFS6(void);
+    void testDFS1(void);
+    void testDFS2(void);
+    void testDFS3(void);
+    void testDFS4(void);
+    void testDFS5(void);
+    void testDFS6(void);
 
 #ifdef __cplusplus
 }

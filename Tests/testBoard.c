@@ -69,7 +69,23 @@ void testPossible(void) {
     printPossible(board1);
 }
 
-void testBFS1(void) {
+void testPossibleTile(void) {
+    int values[4][4] = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}};
+    
+    Board board = filledBoard(values);
+    
+    calculatePossible(&board);
+    printBoard(board);
+    printPossible(board);
+    
+    board.values[0][0] = 1;
+    
+    updateTileAdded(&board, 0, 0);
+    printBoard(board);
+    printPossible(board);
+}
+
+void testDFS1(void) {
     int values[4][4] = {{1,2,0,0},{3,4,0,2},{2,0,0,4},{0,3,2,1}};
     Board board = filledBoard(values);
     
@@ -78,7 +94,7 @@ void testBFS1(void) {
     printBoard(board);
 }
 
-void testBFS2(void) {
+void testDFS2(void) {
     int values[4][4] = {{4,3,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,2}};
     Board board = filledBoard(values);
     
@@ -87,7 +103,7 @@ void testBFS2(void) {
     printBoard(board);
 }
 
-void testBFS3(void) {
+void testDFS3(void) {
     int values[9][9] = {
         {0,0,3,0,0,1,7,2,0},
         {0,0,0,0,0,4,0,0,0},
@@ -106,7 +122,7 @@ void testBFS3(void) {
     printBoard(board);
 }
 
-void testBFS4(void) {
+void testDFS4(void) {
     int values[9][9] = {
         {0,0,5,8,0,0,0,0,7},
         {4,0,0,0,0,0,0,0,0},
@@ -126,7 +142,7 @@ void testBFS4(void) {
     printBoard(board);
 }
 
-void testBFS5(void) {
+void testDFS5(void) {
     int values[9][9] = {
         {0,0,0,2,0,0,0,0,0},
         {0,0,0,0,0,8,4,0,0},
@@ -146,7 +162,7 @@ void testBFS5(void) {
     printBoard(board);
 }
 
-void testBFS6(void) {
+void testDFS6(void) {
     int values[9][9] = {
         {0,0,0,0,0,0,0,0,0},
         {0,0,0,0,0,0,0,0,0},

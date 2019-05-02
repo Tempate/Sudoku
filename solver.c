@@ -17,18 +17,14 @@
 
 // Calculates the possible values inside of certain squares
 void calculatePossible(Board *board) {
-    unsigned int rows[HEIGHT], cols[WIDTH], sqrs[SQRS];
+    unsigned int rows[HEIGHT] = {0}, cols[WIDTH] = {0}, sqrs[SQRS] = {0};
     int pos, m, k;
     
-    // In the case HEIGHT == WIDTH == SQRS loops would be optimized
-    for (int i = 0; i < HEIGHT; i++) rows[i] = 0;
-    for (int i = 0; i < WIDTH; i++) cols[i] = 0;
-    for (int i = 0; i < SQRS; i++) sqrs[i] = 0;
-    
+    // Goes tile by tile and ORs against the values in the respective arrays
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             if (board->values[i][j] != 0) {
-                m = GETSQR(i,j);
+                m = GET_SQR(i,j);
                 pos = POS(board->values[i][j]);
                 rows[i] |= pos;
                 cols[j] |= pos;
@@ -38,11 +34,12 @@ void calculatePossible(Board *board) {
         }
     }
     
+    // Inverts the values
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             if (board->values[i][j] == 0) {
-                k = GETSQR(i,j);
-                board->possible[i][j] = (unsigned int)(pow(2, RANGE) - 1) ^ (rows[i] | cols[j] | sqrs[k]);
+                k = GET_SQR(i,j);
+                board->possible[i][j] = SIZE ^ (rows[i] | cols[j] | sqrs[k]);
             } else {
                 board->possible[i][j] = 0;
             }
@@ -50,24 +47,56 @@ void calculatePossible(Board *board) {
     }
 }
 
+
+// Call this instead of calculatePossible when the value of a tile is changed
+// This function removes 'val' from possible in the row, col and sqr
+// PRE: board->values[x][y] != 0
+void updateTileAdded(Board *board, const int y, const int x) {
+    unsigned int val = SIZE ^ POS(board->values[y][x]);
+    int x0 = SQR*(int)(x/SQR), y0 = SQR*(int)(y/SQR);
+    board->possible[y][x] = 0;
+    
+    // Update rows
+    for (int j = 0; j < WIDTH; j++){
+        if (board->values[y][j] == 0)
+            board->possible[y][j] &= val;
+    }
+
+    // Update cols
+    for (int i = 0; i < HEIGHT; i++){
+        if (board->values[i][x] == 0) 
+            board->possible[i][x] &= val;
+    }
+    
+    // Update sqrs
+    for (int i = y0; i < y0 + SQR; i++){
+        for (int j = x0; j < x0 + SQR; j++){
+            if (board->values[i][j] == 0) 
+                board->possible[i][j] &= val;
+        }
+    }
+} 
+
 void depthFS(Board *board) {
-    unsigned int *c = (unsigned int *) malloc(HEIGHT * WIDTH * sizeof(int *));
-    int index = 0;
+    unsigned short *c = (unsigned short *) malloc(HEIGHT * WIDTH * sizeof(short));
+    int index = 0, val, x, y;
     
     FEEDFORWARD:
     calculatePossible(board);
+    
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             if (board->values[i][j] == 0) {
                 if (board->possible[i][j] == 0) {
-                    index--;
                     goto BACKPROPAGATION;
                 } else {
                     for (int k = 0; k < RANGE; k++) {
-                        if ((board->possible[i][j] & (1<<k)) != 0) {
+                        if (VAL_IN_BYTE(board->possible[i][j], k)) {
                             c[index] = SET_VAL(i,j,k+1);
                             board->values[i][j] = k+1;
-                            calculatePossible(board);
+                            
+                            updateTileAdded(board, i, j);
+                            
                             index++;
                             break;
                         }
@@ -77,27 +106,28 @@ void depthFS(Board *board) {
         }
     }
     
-    index--;
     if (!completeBoard(*board)) {
         BACKPROPAGATION:
-        board->values[GET_Y(c[index])][GET_X(c[index])] = 0;
-        calculatePossible(board);
         
-        while ((1 << GET_VAL(c[index])) > board->possible[GET_Y(c[index])][GET_X(c[index])]) {
-            if (index == 0) {
+        do {
+            index--;
+            if (index < 0) {
                 printf("[-] A solution wasn't found.\n");
                 exit(1);
             }
             
-            index--;
-            board->values[GET_Y(c[index])][GET_X(c[index])] = 0;
+            val = GET_VAL(c[index]);
+            x = GET_X(c[index]);
+            y = GET_Y(c[index]);
+
+            board->values[y][x] = 0;
             calculatePossible(board);
-        }
+        } while ((1 << val) > board->possible[y][x]);
         
-        for (int k = GET_VAL(c[index]); k < RANGE; k++) {
-            if ((board->possible[GET_Y(c[index])][GET_X(c[index])] & (1<<k)) != 0) {
-                board->values[GET_Y(c[index])][GET_X(c[index])] = k+1;
-                c[index] = ((k+1)<<8) + (c[index] & 255);
+        for (int k = val; k < RANGE; k++) {
+            if (VAL_IN_BYTE(board->possible[y][x], k)) {
+                board->values[y][x] = k+1;
+                c[index] = ((k+1) << 8) + (c[index] & 255);
                 index++;
                 goto FEEDFORWARD;
             }

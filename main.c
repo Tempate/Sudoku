@@ -17,13 +17,14 @@
 #include <math.h>
 
 #include "tests.h"
+#include "board.h"
 #include "solver.h"
 
 int main(int argc, char** argv) {
     
     srand(time(NULL));
     
-    testBFS5();
+    testDFS6();
     
     return (EXIT_SUCCESS);
 }

@@ -5,36 +5,39 @@ import ("fmt";"math";"strconv";"time")
 /*------------------------CONST------------------------------*/
 
 const S int = 9
+const SS int = S*S
 const R int = 3
 const ALL Value = (1 << uint(S)) - 1
 
 type Value uint
 
 type Sudoku struct{
-	board [S*S]Value
+	board [SS]Value
 	colsAv [S]Value
 	rowsAv [S]Value
 	sqrsAv [S]Value
 	remeaning []int
 }
+//TODO?: Some stuff could be optimised if Sudoku is passed as a pointer to some functions, might change later
 
 
 /*-------------------------GLOBAL----------------------------*/
 
 var forcedChanges int
-var updateAllCalls int
 
 //Sudokus, they are initialized but only one is solved
-var solvedS [S][S]Value //Testing
-var solvedP [S*S]Value //Testing
-var sudoku [S][S]Value
-var sudokuHard [S][S]Value
-var tempate [S][S]Value
+//Cant make assignments to non-const values outside functions
+var solvedS 	[S][S]Value //Testing
+var solvedP 	[SS]Value //Testing
+var sudoku 		[S][S]Value
+var sudokuHard 	[S][S]Value
+var tempate 	[S][S]Value
+
 
 
 /*---------------------INITIALIZATION------------------------*/
 
-func getSudoku(){
+func initializeSudokus(){
 	sudoku = [S][S]Value{
 		{0, 0, 3,  0, 2, 9,  6, 0, 8},
 		{6, 0, 0,  8, 0, 0,  0, 9, 0},
@@ -82,7 +85,7 @@ func getSudoku(){
 }
 
 func genSud() (s Sudoku){
-	getSudoku()
+	initializeSudokus()
 	s.remeaning = make([]int, 0)
 	for i, l := range tempate{ //Change this to change the sudoku
 		for j, e := range l{
@@ -155,13 +158,12 @@ func (s Sudoku) printSudoku(){
 		}
 	}
 
-	fmt.Println("--------------------")
+	fmt.Println("--------------------", s.filledSquares(), "/", SS)
 }
 
-func (s Sudoku) usedSquares() int{
-	//Counts the number of squares that have been filled
+func (s Sudoku) filledSquares() int{
 	t := 0
-	for i := 0; i < S*S; i++ {
+	for i := 0; i < SS; i++ {
 		if s.board[i] != 0{
 			t++
 		}
@@ -172,7 +174,7 @@ func (s Sudoku) usedSquares() int{
 //TODO: Improve this
 func (s Sudoku) verifySudoku() bool{
 	var sum Value
-	if s.usedSquares() != S*S{
+	if s.filledSquares() != SS{
 		return false
 	}
 	//Check rows
@@ -209,10 +211,21 @@ func (s Sudoku) verifySudoku() bool{
 			}
 		}
 	}
+
 	return true
 }
 
 /*--------------------------SOLVER-----------------------------*/
+
+func lsOfPossible(v Value) []Value{
+	ls := make([]Value, 0)
+	for i := 0; i < S; i++ {
+		if ((1<<uint(i)) & v) != 0{
+			ls = append(ls, (1<<uint(i)))
+		}
+	}
+	return ls
+}
 
 func (s Sudoku) canBeFinished() bool{
 	for _, index := range s.remeaning{
@@ -229,21 +242,10 @@ func (s Sudoku) possible(index int) Value{
 	return s.rowsAv[i] & s.colsAv[j] & s.sqrsAv[getSqrIndex(i, j)]
 }
 
-func allPossible(v Value) []Value{
-	ls := make([]Value, 0)
-	for i := 0; i < S; i++ {
-		if ((1<<uint(i)) & v) != 0{
-			ls = append(ls, (1<<uint(i)))
-		}
-	}
-	return ls
-}
-
-func (s Sudoku) updateAll() Sudoku{
+func (s Sudoku) updateAll() Sudoku{ //This function is only called 1 time
 	var tempRows, tempCols, tempSqrs [S]Value
 	var sqrIndex int
 	var val Value
-	updateAllCalls++
 
 	for i := 0; i < S; i++ {
 		for j := 0; j < S; j++ {
@@ -264,8 +266,7 @@ func (s Sudoku) updateAll() Sudoku{
 	return s
 }
 
-//TODO: Make this shbang work
-func (s Sudoku) updateOne(index int){
+func (s Sudoku) updateOne(index int) Sudoku{
 	i, j := coord(index)
 	sqrIndex := getSqrIndex(i, j)
 	mask := invert(s.board[index])
@@ -273,6 +274,8 @@ func (s Sudoku) updateOne(index int){
 	s.rowsAv[i] &= mask
 	s.colsAv[j] &= mask
 	s.sqrsAv[sqrIndex] &= mask
+
+	return s
 }
 
 func (s Sudoku) setForced() (bool, Sudoku){
@@ -296,6 +299,7 @@ func (s Sudoku) setForced() (bool, Sudoku){
 			s.sqrsAv[sqrIndex] &= mask
 
 			updated = true
+			
 			forcedChanges++ //DEBUG
 
 		}else{
@@ -307,10 +311,8 @@ func (s Sudoku) setForced() (bool, Sudoku){
 	return updated, s
 }
 
-func (s Sudoku) setAllForced() (Sudoku){
+func (s Sudoku) setAllForced() Sudoku{
 	lastUpdate := true
-	
-	s = s.updateAll()
 
 	for lastUpdate{
 		lastUpdate, s = s.setForced()
@@ -321,26 +323,29 @@ func (s Sudoku) setAllForced() (Sudoku){
 
 
 func (s Sudoku) solve() (bool, Sudoku){
+	//Returns false, _ if it cannot find a solution following this branch
 	s = s.setAllForced()
 	if len(s.remeaning) == 0{
 		return true, s
 	}else{
-		//removing at len - 1 reduces the calls to 50, making it super fast (3ms)
+		//removing at len - 1 reduces the number of changes, making it super fast (5-1ms)
+		
 		index := s.remeaning[len(s.remeaning) - 1]
 		s.remeaning = s.remeaning[:len(s.remeaning) - 1]
-		//This one should be as fast, but isnt for this sudoku (50ms)
+		
+		//This one should be as fast, but isnt for this sudoku (70-40ms)
 		/*
 		index := s.remeaning[0]
 		s.remeaning = s.remeaning[1:]
 		*/
 
 
-		for _, val := range allPossible(s.possible(index)) {
-			newS := Sudoku(s)
-			newS.board[index] = Value(val)
-			//newS.updateOne(index) //TODO: Make this work if possible
+		for _, val := range lsOfPossible(s.possible(index)) {
+			newS := Sudoku(s) //Duplicates s
+			newS.board[index] = val
+			newS = newS.updateOne(index)
 			
-			if newS.canBeFinished(){
+			if newS.canBeFinished(){ //This reduces the number of branches by about 1/4
 				pos, newS := newS.solve()
 				if pos{
 					return true, newS
@@ -359,17 +364,17 @@ func (s Sudoku) solve() (bool, Sudoku){
 func main(){
 	s := genSud()
 	s.printSudoku()
-	fmt.Println(s.usedSquares())
 	
 	start := time.Now()
-	//s.rowsAv, s.colsAv, s.sqrsAv = s.updateAll() //TODO: if updateOne works, this should be the only updateAll
+	
+	s = s.updateAll()
 	_, s = s.solve()
+
 	end := time.Now()
 
 	s.printSudoku()
-	fmt.Println(s.usedSquares() == S*S && s.verifySudoku())
 
-	fmt.Println("\nupdateAll calls:", updateAllCalls)
-	fmt.Println("Total changes:", forcedChanges)
-	fmt.Println("\nTime:", end.Sub(start))
+	fmt.Println("\nTotal changes:", forcedChanges)
+	fmt.Println("Is valid:", s.filledSquares() == SS && s.verifySudoku())
+	fmt.Println("Time:", end.Sub(start))
 }

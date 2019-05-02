@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
     
     srand(time(NULL));
     
-    testDFS6();
+    testDFS5();
     
     return (EXIT_SUCCESS);
 }

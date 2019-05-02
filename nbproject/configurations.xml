@@ -49,6 +49,7 @@
       <compileType>
         <cTool>
           <standard>10</standard>
+          <commandLine>-O3</commandLine>
         </cTool>
         <linkerTool>
           <commandLine>-lm</commandLine>

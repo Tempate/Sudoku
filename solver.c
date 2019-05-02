@@ -75,32 +75,23 @@ void updateTileAdded(Board *board, const int y, const int x) {
                 board->possible[i][j] &= val;
         }
     }
-} 
+}
 
 void depthFS(Board *board) {
-    unsigned short *c = (unsigned short *) malloc(HEIGHT * WIDTH * sizeof(short));
-    int index = 0, val, x, y;
+    unsigned short *c = malloc(HEIGHT * WIDTH * sizeof(short));
+    char index = 0, val, x, y;
+    
     
     FEEDFORWARD:
-    calculatePossible(board);
     
+    calculatePossible(board);
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             if (board->values[i][j] == 0) {
                 if (board->possible[i][j] == 0) {
                     goto BACKPROPAGATION;
                 } else {
-                    for (int k = 0; k < RANGE; k++) {
-                        if (VAL_IN_BYTE(board->possible[i][j], k)) {
-                            c[index] = SET_VAL(i,j,k+1);
-                            board->values[i][j] = k+1;
-                            
-                            updateTileAdded(board, i, j);
-                            
-                            index++;
-                            break;
-                        }
-                    }
+                    addNextPossibleValue(board, &index, c, 0, i, j);
                 }
             }
         }
@@ -124,16 +115,24 @@ void depthFS(Board *board) {
             calculatePossible(board);
         } while ((1 << val) > board->possible[y][x]);
         
-        for (int k = val; k < RANGE; k++) {
-            if (VAL_IN_BYTE(board->possible[y][x], k)) {
-                board->values[y][x] = k+1;
-                c[index] = ((k+1) << 8) + (c[index] & 255);
-                index++;
-                goto FEEDFORWARD;
-            }
-        }
+        addNextPossibleValue(board, &index, c, val, y, x);
+        goto FEEDFORWARD;
     } else if (!checkBoard(*board)) {
         printf("[-] The solution found has errors.");
         exit(1);
+    }
+}
+
+void addNextPossibleValue(Board *board, char *index, unsigned short *c, const char start, const char i, const char j) {
+    for (int k = start; k < RANGE; k++) {
+        if (VAL_IN_BYTE(board->possible[i][j], k)) {
+            c[*index] = (unsigned short) SET_VAL(i,j,k+1);
+            board->values[i][j] = k+1;
+
+            updateTileAdded(board,i,j);
+
+            (*index)++;
+            return;
+        }
     }
 }

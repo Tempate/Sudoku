@@ -23,19 +23,18 @@ extern "C" {
 
     
     static inline int GET_SQR(int i, int j) { return SQR * (int)(i/SQR) + (int)(j/SQR); }
-    static inline int GET_VAL(unsigned int c) { return (c-1) >> 8; }
-    static inline int GET_X(unsigned int c) { return (c-1) % 16; }
-    static inline int GET_Y(unsigned int c) { return ((c-1) & 240) >> 4; }
-    static inline int SET_VAL(int i, int j, int k) { return (k << 8) + (i << 4) + j + 1; }
+    static inline char GET_VAL(unsigned short c) { return (c-1) >> 8; }
+    static inline char GET_X(unsigned short c) { return (c-1) % 16; }
+    static inline char GET_Y(unsigned short c) { return ((c-1) & 240) >> 4; }
+    static inline unsigned short SET_VAL(int i, int j, int k) { return (k << 8) + (i << 4) + j + 1; }
     static inline bool VAL_IN_BYTE(unsigned short byte, int k) { return (byte & (1<<k)) != 0; } 
     
     void calculatePossible(Board *board);
     void updateTileAdded(Board *board, const int y, const int x);
-    void depthFS(Board *board);
     
-    void feedforward(Board *board, unsigned int *c, int *index);
-    void backpropagation(Board *board, unsigned int *c, int *index);
-
+    void depthFS(Board *board);
+    void addNextPossibleValue(Board *board, char *index, unsigned short *c, const char start, const char i, const char j);
+    
 #ifdef __cplusplus
 }
 #endif

@@ -11,6 +11,7 @@
 #include "../board.h"
 #include "../checker.h"
 #include "../solver.h"
+#include "../grader.h"
 
 
 void testNewBoard(void) {
@@ -117,6 +118,7 @@ void testDFS3(void) {
     };
     Board board = filledBoard(values);
     
+    printf("Difficulty: %.2f\n", grade(board));
     printBoard(board);
     depthFS(&board);
     printBoard(board);
@@ -137,6 +139,7 @@ void testDFS4(void) {
     
     Board board = filledBoard(values);
     
+    printf("Difficulty: %.2f\n", grade(board));
     printBoard(board);
     depthFS(&board);
     printBoard(board);
@@ -157,9 +160,10 @@ void testDFS5(void) {
     
     Board board = filledBoard(values);
     
-    //printBoard(board);
+    printf("Difficulty: %.2f\n", grade(board));
+    printBoard(board);
     depthFS(&board);
-    //printBoard(board);
+    printBoard(board);
 }
 
 void testDFS6(void) {
@@ -177,6 +181,7 @@ void testDFS6(void) {
     
     Board board = filledBoard(values);
     
+    printf("Difficulty: %.2f\n", grade(board));
     printBoard(board);
     depthFS(&board);
     printBoard(board);

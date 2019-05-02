@@ -32,7 +32,7 @@ extern "C" {
     void calculatePossible(Board *board);
     void updateTileAdded(Board *board, const int y, const int x);
     
-    void depthFS(Board *board);
+    long depthFS(Board *board);
     void addNextPossibleValue(Board *board, char *index, unsigned short *c, const char start, const char i, const char j);
     
 #ifdef __cplusplus

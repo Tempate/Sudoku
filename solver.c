@@ -75,14 +75,15 @@ void updateTileAdded(Board *board, const int y, const int x) {
     }
 }
 
-void depthFS(Board *board) {
+long depthFS(Board *board) {
     unsigned short *c = malloc(HEIGHT * WIDTH * sizeof(short));
     char index = 0, val, x, y;
-    
+    long count = 0;
     
     calculatePossible(board);
     
     FEEDFORWARD:
+    count++;
     
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
@@ -120,6 +121,8 @@ void depthFS(Board *board) {
         printf("[-] The solution found has errors.");
         exit(1);
     }
+    
+    return count;
 }
 
 void addNextPossibleValue(Board *board, char *index, unsigned short *c, const char start, const char i, const char j) {

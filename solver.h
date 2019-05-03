@@ -24,18 +24,17 @@ extern "C" {
     
     static inline int GET_SQR(int i, int j) { return SQR * (int)(i/SQR) + (int)(j/SQR); }
     static inline char GET_VAL(unsigned short c) { return (c-1) >> 8; }
-    static inline char GET_X(unsigned short c) { return (c-1) % 16; }
+    static inline char GET_X(unsigned short c) { return (c-1) & 15; }
     static inline char GET_Y(unsigned short c) { return ((c-1) & 240) >> 4; }
+    static inline unsigned char GET_CRD(int i, int j) { return (i << 4) + j + 1; }
     static inline unsigned short SET_VAL(int i, int j, int k) { return (k << 8) + (i << 4) + j + 1; }
     static inline bool VAL_IN_BYTE(unsigned short byte, int k) { return (byte & (1<<k)) != 0; } 
     
     void calculatePossible(Board *board);
-    void updateTileAdded(Board *board, const int y, const int x);
+    bool updateTileAdded(Board *board, const int y, const int x);
     
-    long depthFS(Board *board);
-    void addNextPossibleValue(Board *board, char *index, unsigned short *c, const char start, const char i, const char j);
-    void changeValue(Board *board, char *index, unsigned short *c, const int i, const int j, const int k);
-    int getForced(unsigned short index);
+    unsigned int depthFS(Board *board);
+    bool addNextPossibleValue(Board *board, char *index, unsigned short *c, const char start, const char i, const char j);
     
 #ifdef __cplusplus
 }

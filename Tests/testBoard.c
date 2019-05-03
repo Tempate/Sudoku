@@ -96,7 +96,7 @@ void testDFS1(void) {
 }
 
 void testDFS2(void) {
-    int values[4][4] = {{4,3,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,2}};
+    int values[4][4] = {{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}};
     Board board = filledBoard(values);
     
     printBoard(board);
@@ -118,7 +118,6 @@ void testDFS3(void) {
     };
     Board board = filledBoard(values);
     
-    printf("Difficulty: %.2f\n", grade(board));
     printBoard(board);
     depthFS(&board);
     printBoard(board);
@@ -139,7 +138,6 @@ void testDFS4(void) {
     
     Board board = filledBoard(values);
     
-    printf("Difficulty: %.2f\n", grade(board));
     printBoard(board);
     depthFS(&board);
     printBoard(board);
@@ -160,28 +158,27 @@ void testDFS5(void) {
     
     Board board = filledBoard(values);
     
-    printf("Difficulty: %.2f\n", grade(board));
     printBoard(board);
-    depthFS(&board);
+    unsigned int steps = depthFS(&board);
     printBoard(board);
+    printf("Steps: %lu\n", steps);
 }
 
 void testDFS6(void) {
     int values[9][9] = {
-        {0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0},
-        {0,0,0,0,0,0,0,0,0}
+        {0, 2, 4,  0, 0, 0,  0, 0, 0},
+        {0, 0, 0,  0, 0, 7,  1, 0, 0},
+        {0, 9, 0,  0, 0, 0,  0, 0, 0},
+        {0, 0, 0,  0, 0, 0,  0, 8, 4},
+        {0, 0, 0,  0, 7, 5,  0, 0, 0},
+        {6, 0, 0,  0, 3, 0,  0, 0, 0},
+        {0, 0, 0,  4, 0, 0,  0, 2, 9},
+        {0, 0, 0,  2, 0, 0,  3, 0, 0},
+        {1, 0, 0,  0, 0, 0,  0, 0, 0} //17
     };
     
     Board board = filledBoard(values);
     
-    printf("Difficulty: %.2f\n", grade(board));
     printBoard(board);
     depthFS(&board);
     printBoard(board);

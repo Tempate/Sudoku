@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 #include <string.h>
 
 #include "board.h"
@@ -51,34 +50,47 @@ void calculatePossible(Board *board) {
 
 // Call this instead of calculatePossible when the value of a tile is changed
 // This function removes 'val' from possible in the row, col and sqr
+// It also checks to make sure it's leaving no tile with no possible values
+// which is what it returns
 // PRE: board->values[x][y] != 0
-void updateTileAdded(Board *board, const int y, const int x) {
+bool updateTileAdded(Board *board, const int y, const int x) {
     unsigned int val = SIZE ^ POS(board->values[y][x]);
     int x0 = SQR*(int)(x/SQR), y0 = SQR*(int)(y/SQR);
+    
     board->possible[y][x] = 0;
     
     for (int j = 0; j < WIDTH; j++){
-        if (board->values[y][j] == 0)
+        if (board->values[y][j] == 0) {
             board->possible[y][j] &= val;
+            if (board->possible[y][j] == 0) return false;
+        }
+            
     }
 
     for (int i = 0; i < HEIGHT; i++){
-        if (board->values[i][x] == 0) 
+        if (board->values[i][x] == 0) {
             board->possible[i][x] &= val;
+            if (board->possible[i][x] == 0) return false;
+        } 
     }
     
     for (int i = y0; i < y0 + SQR; i++){
         for (int j = x0; j < x0 + SQR; j++){
-            if (board->values[i][j] == 0) 
+            if (board->values[i][j] == 0) {
                 board->possible[i][j] &= val;
+                if (board->possible[i][j] == 0) return false;
+            }
         }
     }
+    
+    return true;
 }
 
-long depthFS(Board *board) {
-    unsigned short c[HEIGHT*WIDTH];
+unsigned int depthFS(Board *board) {
+    unsigned short stack[HEIGHT*WIDTH];
     char index = 0, val, x, y;
-    long count = 0;
+    unsigned int count = 0;
+    bool possible;
     
     calculatePossible(board);
     
@@ -88,65 +100,52 @@ long depthFS(Board *board) {
     for (int i = 0; i < HEIGHT; i++) {
         for (int j = 0; j < WIDTH; j++) {
             if (board->values[i][j] == 0) {
-                if (board->possible[i][j] == 0) {
-                    goto BACKPROPAGATION;
-                } else {
-                    addNextPossibleValue(board, &index, &c[0], 0, i, j);
-                }
+                possible = addNextPossibleValue(board, &index, stack, 0, i, j);
+                if (!possible) goto BACKPROPAGATION;
             }
         }
     }
     
-    if (!completeBoard(*board)) {
-        BACKPROPAGATION:
+    if (finishedBoard(*board)) return count;
+    
+    BACKPROPAGATION:
         
-        do {
-            index--;
-            if (index < 0) {
-                printf("[-] A solution wasn't found.\n");
-                exit(1);
-            }
-            
-            val = GET_VAL(c[index]);
-            x = GET_X(c[index]);
-            y = GET_Y(c[index]);
+    do {
+        index--;
+        if (index < 0) {
+            printf("[-] A solution wasn't found.\n");
+            exit(1);
+        }
 
-            board->values[y][x] = 0;
-            calculatePossible(board);
-        } while ((1 << val) > board->possible[y][x]);
-        
-        addNextPossibleValue(board, &index, &c[0], val, y, x);
+        val = GET_VAL(stack[index]);
+        x = GET_X(stack[index]);
+        y = GET_Y(stack[index]);
+
+        board->values[y][x] = 0;
+        calculatePossible(board);
+    } while ((1 << val) > board->possible[y][x]);
+
+    possible = addNextPossibleValue(board, &index, stack, val, y, x);
+
+    if (possible) {
         goto FEEDFORWARD;
-    } else if (!checkBoard(*board)) {
-        printf("[-] The solution found has errors.");
-        exit(1);
+    } else {
+        goto BACKPROPAGATION;
     }
     
     return count;
 }
 
-void addNextPossibleValue(Board *board, char *index, unsigned short *c, const char start, const char i, const char j) {
-    if (__builtin_popcount(board->possible[i][j]) == 1) {
-        changeValue(board, index, c, i, j, getForced(board->possible[i][j]));
-    } else {
-        for (int k = start; k < RANGE; k++) {
-            if (VAL_IN_BYTE(board->possible[i][j], k)) {
-                changeValue(board, index, c, i, j, k+1);
-                return;
-            }
+// Returns whether the changes leave any tile with no possible values
+bool addNextPossibleValue(Board *board, char *index, unsigned short *c, const char start, const char i, const char j) {
+    for (int k = start; k < RANGE; k++) {
+        if (VAL_IN_BYTE(board->possible[i][j], k)) {
+            board->values[i][j] = k+1;
+            
+            c[*index] = (unsigned short) SET_VAL(i,j,k+1);
+            (*index)++;
+            
+            return updateTileAdded(board,i,j);
         }
     }
-}
-
-void changeValue(Board *board, char *index, unsigned short *c, const int i, const int j, const int k) {
-    c[*index] = (unsigned short) SET_VAL(i,j,k);
-    board->values[i][j] = k;
-    updateTileAdded(board,i,j);
-    (*index)++;
-}
-
-int getForced(unsigned short index) {
-    int val = 1;
-    while (index >>= 1) ++val;
-    return val;
 }

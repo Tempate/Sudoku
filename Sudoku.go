@@ -339,8 +339,9 @@ func setForced(s *Sudoku) bool{
 			count++
 		}
 	}
-
-	s.remeaning = nextRem[:count]
+	if updated{
+		s.remeaning = nextRem[:count]
+	}
 	return updated
 }
 

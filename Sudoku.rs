@@ -12,6 +12,54 @@ const SS: usize = S_U*S_U;
 static mut NODES: u64 =  0;
 static mut CHANGES: u64 = 0;
 
+
+/*--------------------------HELPERS-----------------------------*/
+
+fn base_10(mut v: Value) -> u8{
+	if v == 0{
+		0
+	}else{
+		let mut log = 0u8;
+		while v != 1{
+			log += 1;
+			v >>=1;
+		}
+		1 + log
+	}
+}
+#[inline(always)]
+fn is_pow_2(v: Value) -> bool{
+	(v != 0) && (v & (v - 1) == 0)
+}
+#[inline(always)]
+fn index(i: usize, j: usize) -> usize{
+	S_U * i + j
+}
+#[inline(always)]
+fn coord(i: usize) -> (usize, usize){
+	(i/S_U, i % S_U)
+}
+#[inline(always)]
+fn get_sqr_index(i: usize, j: usize) -> usize{
+	R_U*(i/R_U) + (j/R_U)
+}
+
+fn ls_of_possible(v: Value) -> ([Value; S_U], usize){
+	let mut count = 0;
+	let mut ls: [Value; S_U] = [0; S_U];
+
+	for i in 0..S_U {
+		if (1 << i) & v != 0{
+			ls[count] = 1<<i;
+			count += 1;
+		}
+	}
+	return (ls, count);
+}
+
+
+/*--------------------------SUDOKU-----------------------------*/
+
 #[derive(Clone)]
 struct Sudoku{
 	board: [Value; SS],
@@ -21,28 +69,33 @@ struct Sudoku{
 	remeaning: Vec<usize>,
 }
 
-
 impl Sudoku {
-	fn print_sudoku(&self){
-		println!("--------------------");
+	fn print_sudoku(&self) -> String{
+		let mut string = String::with_capacity(SS * 2);
+		string.push_str("--------------------\n");
+
 		for i in 0..S_U {
 			for j in 0..S_U{
 				if self.board[index(i, j)] == 0{
-					print!("- ");
+					string.push_str("- ");
 				}else{
-					print!("{} ", get_val(self.board[index(i, j)]));
+					let borrowed = base_10(self.board[index(i, j)]).to_string();
+					string.push_str(&borrowed);
+					string.push(' ');
 				}
 
 				if j % R_U == R_U - 1{
-					print!(" ");
+					string.push(' ');
 				}
 			}
-			print!("\n");
+			string.push('\n');
 			if i % R_U == R_U - 1 && i != S_U - 1{
-				print!("\n");
+				string.push('\n');
 			}
 		}
-		println!("--------------------");
+		string.push_str("--------------------");
+
+		string
 	}
 
 	fn filled_squares(&self) -> usize{
@@ -114,7 +167,9 @@ impl Sudoku {
 	}
 
 	fn possible(&self, index: usize) -> Value{
-		let (i, j) = coord(index);
+		let i = index / S_U;
+		let j = index % S_U;
+
 		self.rows[i] & self.cols[j] & self.sqrs[get_sqr_index(i, j)]
 	}
 
@@ -230,6 +285,8 @@ impl Sudoku {
 	}
 }
 
+/*-------------------------GENERATOR----------------------------*/
+
 fn gen_sudoku() -> Sudoku{
 	let s: [Value; SS] = 
 		[0, 2, 4,  0, 0, 0,  0, 0, 0, 
@@ -274,58 +331,19 @@ fn gen_sudoku() -> Sudoku{
 		remeaning: v}
 }
 
-fn get_val(mut v: Value) -> u8{
-	if v == 0{
-		0
-	}else{
-		let mut log = 0u8;
-		while v != 1{
-			log += 1;
-			v >>=1;
-		}
-		1 + log
-	}
-}
-#[inline(always)]
-fn is_pow_2(v: Value) -> bool{
-	(v != 0) && (v & (v - 1) == 0)
-}
-#[inline(always)]
-fn index(i: usize, j: usize) -> usize{
-	S_U * i + j
-}
-#[inline(always)]
-fn coord(i: usize) -> (usize, usize){
-	(i/S_U, i % S_U)
-}
-#[inline(always)]
-fn get_sqr_index(i: usize, j: usize) -> usize{
-	R_U*(i/R_U) + (j/R_U)
-}
 
-fn ls_of_possible(v: Value) -> ([Value; S_U], usize){
-	let mut count = 0;
-	let mut ls: [Value; S_U] = [0; S_U];
-
-	for i in 0..S_U {
-		if (1 << i) & v != 0{
-			ls[count] = 1<<i;
-			count += 1;
-		}
-	}
-	return (ls, count);
-}
+/*--------------------------MAIN-----------------------------*/
 
 fn main() {
 	let mut s = gen_sudoku();
 	s.set_possible();
 
-	s.print_sudoku();
+	println!("{}", s.print_sudoku());
 	println!("{}, {}", s.is_valid(), s.filled_squares());
 	
 	let (_, res) = Sudoku::solve(s);
 
-	res.print_sudoku();
+	println!("{}", res.print_sudoku());
 	println!("{}, {}", res.is_valid(), res.filled_squares());
 	
 	unsafe{

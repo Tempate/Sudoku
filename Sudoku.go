@@ -2,6 +2,7 @@ package main
 
 import ("fmt";"strconv";"time")
 
+
 /*------------------------CONST------------------------------*/
 
 const S int = 9
@@ -28,71 +29,11 @@ var counter int
 
 /*---------------------INITIALIZATION------------------------*/
 
-func initializeSudokus(toUse int) [S][S]Value{
-	switch toUse{
+
+func GenSud() (s Sudoku){
+	temp_counter := 0
 	
-	case 0:
-		return [S][S]Value{
-		{0, 0, 3,  0, 2, 9,  6, 0, 8},
-		{6, 0, 0,  8, 0, 0,  0, 9, 0},
-		{0, 9, 5,  4, 0, 6,  0, 0, 7},
-		{1, 6, 0,  9, 3, 0,  8, 0, 4},
-		{4, 0, 7,  0, 8, 0,  9, 0, 6},
-		{9, 0, 8,  0, 4, 2,  0, 0, 0},
-		{3, 0, 0,  2, 0, 4,  0, 6, 0},
-		{0, 7, 0,  0, 0, 1,  0, 0, 5},
-		{5, 0, 9,  7, 6, 0,  3, 1, 2}} //42 w/o branching 
-
-	case 1:
-		return [S][S]Value{
-		{0, 0, 3,  0, 2, 9,  6, 0, 8},
-		{6, 0, 0,  8, 0, 0,  0, 9, 0},
-		{0, 0, 0,  4, 0, 6,  0, 0, 7},
-		{0, 0, 0,  9, 3, 0,  8, 0, 4},
-		{4, 0, 7,  0, 8, 0,  9, 0, 6},
-		{9, 0, 8,  0, 4, 2,  0, 0, 0},
-		{3, 0, 0,  2, 0, 4,  0, 0, 0},
-		{0, 7, 0,  0, 0, 1,  0, 0, 5},
-		{5, 0, 9,  7, 6, 0,  3, 0, 0}} //35
-
-	case 2:
-		return [S][S]Value{
-		{0, 0, 7,  4, 8, 0,  9, 0, 0},
-		{4, 6, 0,  0, 0, 0,  0, 0, 0},
-		{0, 0, 0,  0, 0, 1,  0, 5, 8},
-		{0, 9, 0,  5, 4, 0,  6, 0, 0},
-		{0, 0, 0,  0, 0, 0,  0, 0, 0},
-		{0, 0, 4,  0, 6, 9,  0, 1, 0},
-		{3, 8, 0,  7, 0, 0,  0, 0, 0},
-		{0, 0, 0,  0, 0, 0,  0, 2, 6},
-		{0, 0, 5,  0, 1, 6,  8, 0, 0}} //26
-
-	case 3: //Tempate
-		return [S][S]Value{
-		{0, 0, 0,  2, 0, 0,  0, 0, 0},
-		{0, 0, 0,  0, 0, 8,  4, 0, 0},
-		{0, 7, 0,  4, 0, 0,  8, 9, 0},
-		{0, 0, 0,  0, 5, 0,  0, 1, 0},
-		{0, 1, 0,  0, 0, 0,  0, 0, 0},
-		{0, 0, 3,  0, 0, 6,  0, 0, 2},
-		{0, 0, 0,  0, 0, 5,  7, 0, 8},
-		{8, 0, 0,  0, 3, 0,  0, 0, 0},
-		{0, 6, 1,  0, 0, 0,  0, 4, 0}} //21
-
-	case 4:
-		return [S][S]Value{
-		{7, 5, 0,  0, 0, 0,  0, 0, 0},
-		{0, 0, 0,  0, 0, 0,  0, 1, 2},
-		{0, 0, 3,  0, 0, 4,  0, 0, 0},
-		{0, 0, 0,  0, 0, 0,  3, 0, 0},
-		{0, 0, 5,  0, 0, 0,  4, 0, 6},
-		{0, 7, 0,  1, 8, 0,  5, 0, 0},
-		{0, 0, 0,  0, 5, 6,  0, 0, 0},
-		{0, 2, 0,  0, 0, 0,  0, 0, 0},
-		{1, 8, 0,  0, 0, 0,  0, 0, 0}} //19
-
-	case 5:
-		return [S][S]Value{
+	sud := [S][S]Value{
 		{0, 2, 4,  0, 0, 0,  0, 0, 0},
 		{0, 0, 0,  0, 0, 7,  1, 0, 0},
 		{0, 9, 0,  0, 0, 0,  0, 0, 0},
@@ -103,14 +44,7 @@ func initializeSudokus(toUse int) [S][S]Value{
 		{0, 0, 0,  2, 0, 0,  3, 0, 0},
 		{1, 0, 0,  0, 0, 0,  0, 0, 0}} //17
 
-	}
-
-	panic("Selected sudoku hasn't been implemented")
-}
-
-func genSud(toUse int) (s Sudoku){
-	temp_counter := 0
-	for i, l := range initializeSudokus(toUse){ //Change this to change the sudoku
+	for i, l := range sud{
 		for j, e := range l{
 			if e == 0{
 				s.board[index(i, j)] = 0
@@ -128,7 +62,7 @@ func genSud(toUse int) (s Sudoku){
 
 /*---------------------HELPER------------------------*/
 
-func getVal(v Value) int{
+func base10(v Value) int{
 	if v == 0{
 		return 0
 	}else{
@@ -141,9 +75,6 @@ func getVal(v Value) int{
 	}
 }
 
-func bin(v Value) string{
-	return strconv.FormatInt(int64(v), 2)
-}
 
 //I think this functions are inlined automagically
 func index(i, j int) int{
@@ -162,45 +93,48 @@ func isPow2(v Value) bool{
 
 /*---------------------CHECKING------------------------*/
 
-func (s Sudoku) printSudoku(){
-	fmt.Println("--------------------")
+
+func (self Sudoku) PrintSudoku() string{
+	str := "--------------------\n"
 	for i := 0; i < S; i++ {
+		sSmall := ""
 		for j := 0; j < S; j++ {
 
-			if s.board[index(i, j)] == 0{
-				fmt.Print("- ")
+			if self.board[index(i, j)] == 0{
+				sSmall += "- "
 			}else{
-				fmt.Print(getVal(s.board[index(i, j)]), " ")
+				sSmall += strconv.Itoa(base10(self.board[index(i, j)])) + " "
 			}
 
 			if j % R == R - 1{
-				fmt.Print(" ")
+				sSmall += " "
 			}
 		}
 
-		fmt.Println("")
+		str += sSmall
+		str += "\n"
 		
 		if i % R == R - 1 && i != S - 1{
-			fmt.Println("")
+			str += "\n"
 		}
 	}
 
-	fmt.Println("--------------------", s.filledSquares(), "/", SS)
+	return str + "--------------------" + strconv.Itoa(self.filledSquares()) + "/" + strconv.Itoa(SS)
 }
 
-func (s Sudoku) filledSquares() int{
+func (self Sudoku) filledSquares() int{
 	t := 0
 	for i := 0; i < SS; i++ {
-		if s.board[i] != 0{
+		if self.board[i] != 0{
 			t++
 		}
 	}
 	return t
 }
 
-func (s Sudoku) finished() bool{
+func (self Sudoku) finished() bool{
 	for i := 0; i < SS; i++ {
-		if s.board[i] == 0{
+		if self.board[i] == 0{
 			return false
 		}
 	}
@@ -208,19 +142,19 @@ func (s Sudoku) finished() bool{
 	return true
 }
 
-func (s Sudoku) verifySudoku() bool{
+func (self Sudoku) verifySudoku() bool{
 	var sum Value
-	if ! s.finished(){
+	if ! self.finished(){
 		return false
 	}
 	//Check rows
 	for i := 0; i < S; i++ {
 		sum = 0
 		for j := 0; j < S; j++ {
-			if sum & s.board[index(i, j)] != 0{
+			if sum & self.board[index(i, j)] != 0{
 				return false
 			}
-			sum += s.board[index(i, j)]
+			sum += self.board[index(i, j)]
 		}
 		if sum != ALL{
 			return false
@@ -230,10 +164,10 @@ func (s Sudoku) verifySudoku() bool{
 	for i := 0; i < S; i++ {
 		sum = 0
 		for j := 0; j < S; j++ {
-			if sum & s.board[index(j, i)] != 0{
+			if sum & self.board[index(j, i)] != 0{
 				return false
 			}
-			sum += s.board[index(j, i)]
+			sum += self.board[index(j, i)]
 		}
 		if sum != ALL{
 			return false
@@ -245,10 +179,10 @@ func (s Sudoku) verifySudoku() bool{
 			sum = 0
 			for i := 0; i < R; i++ {
 				for j := 0; j < R; j++ {
-					if sum & s.board[index(R*x + i, R*y + j)] != 0{
+					if sum & self.board[index(R*x + i, R*y + j)] != 0{
 						return false
 					}
-					sum += s.board[index(R*x + i, R*y + j)]		
+					sum += self.board[index(R*x + i, R*y + j)]		
 				}
 			}
 			if sum != ALL{
@@ -263,8 +197,8 @@ func (s Sudoku) verifySudoku() bool{
 /*--------------------------SOLVER-----------------------------*/
 
 func lsOfPossible(v Value) []Value{
-	var ls [S]Value
 	var count int
+	var ls [S]Value
 	for i := 0; i < S; i++ {
 		if ((1<<uint(i)) & v) != 0{
 			ls[count] = (1<<uint(i))
@@ -274,9 +208,9 @@ func lsOfPossible(v Value) []Value{
 	return ls[:count]
 }
 
-func (s Sudoku) canBeFinished() bool{
+func (self Sudoku) canBeFinished() bool{
 	for i := 0; i < counter; i++{
-		if s.board[remeaning[i]] == 0 && s.possible(remeaning[i]) == 0{
+		if self.board[remeaning[i]] == 0 && self.possible(remeaning[i]) == 0{
 			return false
 		}
 	}
@@ -284,9 +218,10 @@ func (s Sudoku) canBeFinished() bool{
 	return true
 }
 
-func (s Sudoku) possible(index int) Value{
-	i, j := coord(index) 
-	return s.rowsAv[i] & s.colsAv[j] & s.sqrsAv[getSqrIndex(i, j)]
+func (self Sudoku) possible(index int) Value{
+	i := index / S
+	j := index % S
+	return self.rowsAv[i] & self.colsAv[j] & self.sqrsAv[getSqrIndex(i, j)]
 }
 
 func setPossible(s *Sudoku){ //This function is only called 1 time
@@ -318,11 +253,11 @@ func updateOne(index int, s *Sudoku){
 }
 
 
-func setForced(s *Sudoku) bool{
+func setForced(s *Sudoku) int{
 	var i, j int
 	var val int
 	var available, mask Value
-	var updated bool
+	var updated int
 
 	for k := 0; k < counter; k++{
 		val = remeaning[k]
@@ -332,6 +267,10 @@ func setForced(s *Sudoku) bool{
 		i, j = coord(val)
 		available = s.rowsAv[i] & s.colsAv[j] & s.sqrsAv[getSqrIndex(i, j)]
 
+		if available == 0{
+			return 2
+		}
+
 		if isPow2(available){
 			s.board[val] = available
 			mask = ALL ^ available
@@ -340,7 +279,7 @@ func setForced(s *Sudoku) bool{
 			s.colsAv[j] &= mask
 			s.sqrsAv[getSqrIndex(i, j)] &= mask
 
-			updated = true
+			updated = 1
 			
 			forcedChanges++ //DEBUG
 
@@ -350,26 +289,33 @@ func setForced(s *Sudoku) bool{
 	return updated
 }
 
-func setAllForced(s *Sudoku){
-	for lastUpdate := true; lastUpdate;{
+func setAllForced(s *Sudoku) bool{
+	for lastUpdate := 1; lastUpdate == 1;{
 		lastUpdate = setForced(s)
+		if lastUpdate == 2{
+			return false
+		}
 	}
+	return true
 }
 
 
-func (s Sudoku) solve() (bool, Sudoku){
+func (self Sudoku) solve() (bool, Sudoku){
 	//Returns false, _ if it cannot find a solution following this branch
-	calls++ //DEBUG
+	calls++
 
-	setAllForced(&s)
+	isPos := setAllForced(&self)
 
-	if s.finished(){
-		return true, s
+	if ! isPos{
+		return false, self
 	}
-
+	if self.finished(){
+		return true, self
+	}
+	
 	//Faster in #3, #5
 	var index int
-	for i := counter - 1; s.board[index] != 0 && i >= 0; i-- {
+	for i := counter - 1; self.board[index] != 0 && i >= 0; i-- {
 		index = remeaning[i]	
 	}
 	
@@ -381,8 +327,8 @@ func (s Sudoku) solve() (bool, Sudoku){
 	*/
 
 
-	for _, val := range lsOfPossible(s.possible(index)) {
-		newS := Sudoku(s) //Duplicates s
+	for _, val := range lsOfPossible(self.possible(index)) {
+		newS := Sudoku(self) //Duplicates s
 		newS.board[index] = val
 		updateOne(index, &newS)
 		
@@ -397,25 +343,37 @@ func (s Sudoku) solve() (bool, Sudoku){
 	return false, Sudoku{}
 }
 
+func SolveMaster(s Sudoku) (Sudoku, /*ok*/ bool, /*forcedChanges*/ int, /*calls*/ int){
+	rs := Sudoku(s)
 
+	setPossible(&rs)
 
-/*--------------------------MAIN-----------------------------*/
+	if ! rs.canBeFinished(){
+		return s, false, 0, 0
+	}
+	_, rs = rs.solve()
+
+	ok := rs.filledSquares() == SS && rs.verifySudoku()
+
+	return rs, ok, forcedChanges, calls
+}
 
 func main(){
-	s := genSud(5)
-	s.printSudoku()
 
+	s := GenSud()
+	fmt.Println(s.PrintSudoku())
+	
 	start := time.Now()
 	
-	setPossible(&s)
-	_, s = s.solve()
+	s, ok, forcedChanges, calls := SolveMaster(s)
 
 	end := time.Now()
 
-	s.printSudoku()
+	fmt.Println(s.PrintSudoku())
 
 	fmt.Println("\nTotal changes:", forcedChanges)
 	fmt.Println("Total nodes:", calls)
-	fmt.Println("Is valid:", s.filledSquares() == SS && s.verifySudoku())
+	fmt.Println("Is valid:", ok)
 	fmt.Println("Time:", end.Sub(start))
+	
 }

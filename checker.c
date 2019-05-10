@@ -6,7 +6,9 @@
 
 #include <stdbool.h>
 #include <math.h>
+
 #include "board.h"
+#include "solver.h"
 
 bool checkBoard(Board board) {
     int pos, row, col, sqr;

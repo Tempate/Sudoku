@@ -118,15 +118,6 @@ impl Sudoku {
 		self.rows[i] & self.cols[j] & self.sqrs[get_sqr_index(i, j)]
 	}
 
-	fn can_be_finished(&self) -> bool{
-		for index in self.remeaning.iter() {
-			if self.possible(*index) == 0{
-				return false;
-			}
-		}
-
-		true
-	}
 
 	fn set_possible(&mut self){
 		let mut val;
@@ -155,14 +146,17 @@ impl Sudoku {
 		self.sqrs[get_sqr_index(i, j)] &= mask;
 	}
 
-	fn set_forced(&mut self) -> bool{
-		let mut updated = false;
+	fn set_forced(&mut self) -> u8{
+		let mut updated = 0;
 		let mut next_remeaning: Vec<usize> = Vec::with_capacity(self.remeaning.len());
 
 		for val in self.remeaning.iter() {
 			let (i, j) = coord(*val);
 			let available = self.rows[i] & self.cols[j] & self.sqrs[get_sqr_index(i, j)];
 
+			if available == 0{
+				return 2;
+			}
 			if is_pow_2(available){
 				self.board[*val] = available;
 
@@ -172,7 +166,7 @@ impl Sudoku {
 				self.cols[j] &= mask;
 				self.sqrs[get_sqr_index(i, j)] &= mask;
 
-				updated = true;
+				updated = 1;
 
 				unsafe{CHANGES += 1;}
 			}else{
@@ -180,31 +174,44 @@ impl Sudoku {
 			}
 
 		}
-		if updated{
+		if updated == 1{
 			self.remeaning = next_remeaning;
 		}
 
 		updated
 	}
 
-	fn set_all_forced(&mut self){
-		let mut last_updated = true;
+	fn set_all_forced(&mut self) -> bool{
+		let mut last_updated = 1;
 		
-		while last_updated {
+		while last_updated == 1 {
 			last_updated = self.set_forced();
+			if last_updated == 2{
+				return false;
+			}
 		}
+
+		true
 	}
 
 	fn solve(mut s: Sudoku) -> (bool, Sudoku){
 		unsafe {NODES += 1;}
 		
-		s.set_all_forced();
-
 		if s.remeaning.len() == 0{
 			return (true, s);
+		}
+
+		let is_pos = s.set_all_forced();
+
+		if ! is_pos{
+			return (false, s);
+		}else if s.remeaning.len() == 0{
+			return (true, s);
 		}else{
+
 			let index = s.remeaning.pop().expect("NO ELEMS");
 			let (ls, count) = ls_of_possible(s.possible(index));
+			
 			for i in 0..count{
 				let val = ls[i];
 				let mut new_sud = s.clone();
@@ -212,16 +219,14 @@ impl Sudoku {
 				new_sud.board[index] = val;
 				new_sud.update(index);
 
-				if new_sud.can_be_finished(){
-					let (pos, res) = Sudoku::solve(new_sud);
-					if pos{
-						return (true, res);
-					}
+				let (pos, res) = Sudoku::solve(new_sud);
+				if pos{
+					return (true, res);
 				}
 			}
 		}
 
-		return (false, s);
+		(false, s)
 	}
 }
 

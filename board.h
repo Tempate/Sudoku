@@ -18,26 +18,29 @@
 #define WIDTH HEIGHT
 #define RANGE HEIGHT
 #define SQR 3
+#define SQRS WIDTH * HEIGHT / (SQR * SQR)
+#define TOTAL HEIGHT*WIDTH
 #define SIZE (1<<RANGE)-1
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+   
     
     static inline int POS(int x) { return 1 << (x-1); }
+    static inline int POW2(char pow) { return 1 << pow; }
     
     typedef struct {
         unsigned char values[HEIGHT][WIDTH];
-        unsigned short possible[HEIGHT][WIDTH];
+        
+        unsigned short rowsPos[HEIGHT];
+        unsigned short colsPos[WIDTH];
+        unsigned short sqrsPos[SQRS];
     } Board;
     
-    Board blankBoard(void);
-    Board filledBoard(int values[HEIGHT][WIDTH]);
-    Board randomBoard(void);
-    Board duplicateBoard(Board board);
     
+    Board getBoardWithValues(int values[HEIGHT][WIDTH]);
     void printBoard(Board board);
-    void printPossible(Board board);
 
 
 #ifdef __cplusplus

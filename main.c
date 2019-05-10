@@ -25,8 +25,8 @@ int main(int argc, char** argv) {
     srand(time(NULL));
     
     time_t start = clock();
-    testDFS5();
-    printf("Took: %ld\n", clock() - start);
+    testDFS4();
+    printf("Time: %ld\n", clock() - start);
     
     return (EXIT_SUCCESS);
 }

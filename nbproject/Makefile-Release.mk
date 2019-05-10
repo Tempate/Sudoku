@@ -35,11 +35,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/Tests/testBoard.o \
+	${OBJECTDIR}/Tests/solverTests.o \
 	${OBJECTDIR}/board.o \
 	${OBJECTDIR}/checker.o \
-	${OBJECTDIR}/generator.o \
-	${OBJECTDIR}/grader.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/solver.o
 
@@ -68,10 +66,10 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/sudoku: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/sudoku ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/Tests/testBoard.o: Tests/testBoard.c
+${OBJECTDIR}/Tests/solverTests.o: Tests/solverTests.c
 	${MKDIR} -p ${OBJECTDIR}/Tests
 	${RM} "$@.d"
-	$(COMPILE.c) -O2 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Tests/testBoard.o Tests/testBoard.c
+	$(COMPILE.c) -O2 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Tests/solverTests.o Tests/solverTests.c
 
 ${OBJECTDIR}/board.o: board.c
 	${MKDIR} -p ${OBJECTDIR}
@@ -82,16 +80,6 @@ ${OBJECTDIR}/checker.o: checker.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.c) -O2 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/checker.o checker.c
-
-${OBJECTDIR}/generator.o: generator.c
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.c) -O2 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/generator.o generator.c
-
-${OBJECTDIR}/grader.o: grader.c
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.c) -O2 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/grader.o grader.c
 
 ${OBJECTDIR}/main.o: main.c
 	${MKDIR} -p ${OBJECTDIR}

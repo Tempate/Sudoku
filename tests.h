@@ -17,17 +17,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-    void testNewBoard(void);
-    void testChecker(void);
-    void testPossible(void);
     
     void testDFS1(void);
     void testDFS2(void);
     void testDFS3(void);
     void testDFS4(void);
-    void testDFS5(void);
-    void testDFS6(void);
 
 #ifdef __cplusplus
 }

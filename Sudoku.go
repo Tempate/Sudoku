@@ -16,7 +16,6 @@ type Sudoku struct{
 	colsAv [S]Value
 	rowsAv [S]Value
 	sqrsAv [S]Value
-	remeaning []int
 }
 
 /*-------------------------GLOBAL----------------------------*/
@@ -24,6 +23,8 @@ type Sudoku struct{
 var forcedChanges int
 var calls int
 
+var remeaning [SS]int
+var counter int
 
 /*---------------------INITIALIZATION------------------------*/
 
@@ -108,17 +109,19 @@ func initializeSudokus(toUse int) [S][S]Value{
 }
 
 func genSud(toUse int) (s Sudoku){
-	s.remeaning = make([]int, 0)
+	temp_counter := 0
 	for i, l := range initializeSudokus(toUse){ //Change this to change the sudoku
 		for j, e := range l{
 			if e == 0{
 				s.board[index(i, j)] = 0
-				s.remeaning = append(s.remeaning, index(i, j))
+				remeaning[temp_counter] = index(i, j)
+				temp_counter++
 			}else{
 				s.board[index(i, j)] = 1 << uint(e - 1)
 			}
 		}
 	}
+	counter = temp_counter
 
 	return s
 }
@@ -195,9 +198,19 @@ func (s Sudoku) filledSquares() int{
 	return t
 }
 
+func (s Sudoku) finished() bool{
+	for i := 0; i < SS; i++ {
+		if s.board[i] == 0{
+			return false
+		}
+	}
+
+	return true
+}
+
 func (s Sudoku) verifySudoku() bool{
 	var sum Value
-	if s.filledSquares() != SS{
+	if ! s.finished(){
 		return false
 	}
 	//Check rows
@@ -262,8 +275,8 @@ func lsOfPossible(v Value) []Value{
 }
 
 func (s Sudoku) canBeFinished() bool{
-	for _, index := range s.remeaning{
-		if s.possible(index) == 0{
+	for i := 0; i < counter; i++{
+		if s.board[remeaning[i]] == 0 && s.possible(remeaning[i]) == 0{
 			return false
 		}
 	}
@@ -278,16 +291,14 @@ func (s Sudoku) possible(index int) Value{
 
 func setPossible(s *Sudoku){ //This function is only called 1 time
 	var tempRows, tempCols, tempSqrs [S]Value
-	var sqrIndex int
 	var val Value
 
 	for i := 0; i < S; i++ {
 		for j := 0; j < S; j++ {
 			val = s.board[index(i, j)]
-			sqrIndex = getSqrIndex(i, j)
 			tempRows[i] |= val
 			tempCols[j] |= val
-			tempSqrs[sqrIndex] |= val
+			tempSqrs[getSqrIndex(i, j)] |= val
 		}
 	}
 
@@ -300,27 +311,26 @@ func setPossible(s *Sudoku){ //This function is only called 1 time
 
 func updateOne(index int, s *Sudoku){
 	i, j := coord(index)
-	sqrIndex := getSqrIndex(i, j)
-	mask := ALL ^ s.board[index]
 
-	s.rowsAv[i] &= mask
-	s.colsAv[j] &= mask
-	s.sqrsAv[sqrIndex] &= mask
+	s.rowsAv[i] &= ALL ^ s.board[index]
+	s.colsAv[j] &= ALL ^ s.board[index]
+	s.sqrsAv[getSqrIndex(i, j)] &= ALL ^ s.board[index]
 }
 
 
 func setForced(s *Sudoku) bool{
-	var i, j, sqrIndex int
-	var count int
+	var i, j int
+	var val int
 	var available, mask Value
 	var updated bool
-	var nextRem [SS]int //This isnt very space efficient, maybe nextRem := make([]int, len(s.remeaning))
 
-
-	for _, val := range s.remeaning{
+	for k := 0; k < counter; k++{
+		val = remeaning[k]
+		if s.board[val] != 0{
+			continue
+		}
 		i, j = coord(val)
-		sqrIndex = getSqrIndex(i, j)
-		available = s.rowsAv[i] & s.colsAv[j] & s.sqrsAv[sqrIndex]
+		available = s.rowsAv[i] & s.colsAv[j] & s.sqrsAv[getSqrIndex(i, j)]
 
 		if isPow2(available){
 			s.board[val] = available
@@ -328,25 +338,19 @@ func setForced(s *Sudoku) bool{
 			
 			s.rowsAv[i] &= mask
 			s.colsAv[j] &= mask
-			s.sqrsAv[sqrIndex] &= mask
+			s.sqrsAv[getSqrIndex(i, j)] &= mask
 
 			updated = true
 			
 			forcedChanges++ //DEBUG
 
-		}else{
-			nextRem[count] = val
-			count++
 		}
 	}
-	if updated{
-		s.remeaning = nextRem[:count]
-	}
+
 	return updated
 }
 
 func setAllForced(s *Sudoku){
-
 	for lastUpdate := true; lastUpdate;{
 		lastUpdate = setForced(s)
 	}
@@ -355,35 +359,37 @@ func setAllForced(s *Sudoku){
 
 func (s Sudoku) solve() (bool, Sudoku){
 	//Returns false, _ if it cannot find a solution following this branch
-	calls++
+	calls++ //DEBUG
 
 	setAllForced(&s)
 
-	if len(s.remeaning) == 0{
+	if s.finished(){
 		return true, s
-	}else{
-		//Faster in #3, #5
-		
-		index := s.remeaning[len(s.remeaning) - 1]
-		s.remeaning = s.remeaning[:len(s.remeaning) - 1]
-		
-		//Faster in #4
-		/*
-		index := s.remeaning[0]
-		s.remeaning = s.remeaning[1:]
-		*/
+	}
+
+	//Faster in #3, #5
+	var index int
+	for i := counter - 1; s.board[index] != 0 && i >= 0; i-- {
+		index = remeaning[i]	
+	}
+	
+	//Faster in #4
+	/*
+	for i := 0; s.board[index] != 0 && i < counter; i++ {
+		index = remeaning[i]	
+	}
+	*/
 
 
-		for _, val := range lsOfPossible(s.possible(index)) {
-			newS := Sudoku(s) //Duplicates s
-			newS.board[index] = val
-			updateOne(index, &newS)
-			
-			if newS.canBeFinished(){ //This reduces the number of branches by about 1/4
-				pos, newS := newS.solve()
-				if pos{
-					return true, newS
-				}
+	for _, val := range lsOfPossible(s.possible(index)) {
+		newS := Sudoku(s) //Duplicates s
+		newS.board[index] = val
+		updateOne(index, &newS)
+		
+		if newS.canBeFinished(){ //This reduces the number of branches by about 1/4
+			pos, newS := newS.solve()
+			if pos{
+				return true, newS
 			}
 		}
 	}
@@ -396,9 +402,9 @@ func (s Sudoku) solve() (bool, Sudoku){
 /*--------------------------MAIN-----------------------------*/
 
 func main(){
-	s := genSud(4)
+	s := genSud(5)
 	s.printSudoku()
-	
+
 	start := time.Now()
 	
 	setPossible(&s)

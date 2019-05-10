@@ -7,7 +7,6 @@
       <itemPath>board.h</itemPath>
       <itemPath>checker.h</itemPath>
       <itemPath>generator.h</itemPath>
-      <itemPath>grader.h</itemPath>
       <itemPath>solver.h</itemPath>
       <itemPath>tests.h</itemPath>
     </logicalFolder>
@@ -20,11 +19,9 @@
                    projectFiles="true">
       <itemPath>board.c</itemPath>
       <itemPath>checker.c</itemPath>
-      <itemPath>generator.c</itemPath>
-      <itemPath>grader.c</itemPath>
       <itemPath>main.c</itemPath>
       <itemPath>solver.c</itemPath>
-      <itemPath>Tests/testBoard.c</itemPath>
+      <itemPath>Tests/solverTests.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -49,13 +46,13 @@
       <compileType>
         <cTool>
           <standard>10</standard>
-          <commandLine>-p -pg -O3</commandLine>
+          <commandLine>-O3</commandLine>
         </cTool>
         <linkerTool>
           <commandLine>-lm</commandLine>
         </linkerTool>
       </compileType>
-      <item path="Tests/testBoard.c" ex="false" tool="0" flavor2="0">
+      <item path="Tests/solverTests.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="board.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -65,13 +62,7 @@
       </item>
       <item path="checker.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="generator.c" ex="false" tool="0" flavor2="0">
-      </item>
       <item path="generator.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="grader.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="grader.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -103,7 +94,7 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="Tests/testBoard.c" ex="false" tool="0" flavor2="0">
+      <item path="Tests/solverTests.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="board.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -113,13 +104,7 @@
       </item>
       <item path="checker.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="generator.c" ex="false" tool="0" flavor2="0">
-      </item>
       <item path="generator.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="grader.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="grader.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>

@@ -15,7 +15,8 @@ static mut CHANGES: u64 = 0;
 
 /*--------------------------HELPERS-----------------------------*/
 
-fn base_10(mut v: Value) -> u8{
+fn log2(mut v: Value) -> u8{
+	/* Returns 1 + log2(n) or 0 */
 	if v == 0{
 		0
 	}else{
@@ -44,22 +45,15 @@ fn get_sqr_index(i: usize, j: usize) -> usize{
 	R_U*(i/R_U) + (j/R_U)
 }
 
-fn ls_of_possible(v: Value) -> ([Value; S_U], usize){
-	let mut count = 0;
-	let mut ls: [Value; S_U] = [0; S_U];
-
-	for i in 0..S_U {
-		if (1 << i) & v != 0{
-			ls[count] = 1<<i;
-			count += 1;
-		}
-	}
-	return (ls, count);
-}
-
 
 /*--------------------------SUDOKU-----------------------------*/
 
+/* This is the main struct of the program.
+ * It stores the board, a list with all possible values for each
+ * row / col / sqr and a list of the remaning indices in the board.
+ * It stores each value as a power of 2, the posibles values are just
+ * |s of all the possibilities
+ */
 #[derive(Clone)]
 struct Sudoku{
 	board: [Value; SS],
@@ -71,6 +65,7 @@ struct Sudoku{
 
 impl Sudoku {
 	fn print_sudoku(&self) -> String{
+		/* String representation of the Sudoku. TODO: Implement it as a to_string() */
 		let mut string = String::with_capacity(SS * 2);
 		string.push_str("--------------------\n");
 
@@ -79,7 +74,7 @@ impl Sudoku {
 				if self.board[index(i, j)] == 0{
 					string.push_str("- ");
 				}else{
-					let borrowed = base_10(self.board[index(i, j)]).to_string();
+					let borrowed = log2(self.board[index(i, j)]).to_string();
 					string.push_str(&borrowed);
 					string.push(' ');
 				}
@@ -98,18 +93,21 @@ impl Sudoku {
 		string
 	}
 
-	fn filled_squares(&self) -> usize{
+	fn filled_tiles(&self) -> usize{
+		/* Returns the number of filled tiles */
 		let mut t: usize = 0;
 		for i in 0..SS {
 			if self.board[i] != 0{
 				t += 1;
 			}
 		}
+
 		t
 	}
 
 	fn is_valid(&self) -> bool{
-		if self.filled_squares() != SS{
+		/* Returns if a sudoku is valid*/
+		if self.filled_tiles() != SS{
 			return false;
 		}
 
@@ -167,19 +165,18 @@ impl Sudoku {
 	}
 
 	fn possible(&self, index: usize) -> Value{
-		let i = index / S_U;
-		let j = index % S_U;
+		/* Returns the possible values in a tile */
+		let (i, j) = coord(index);
 
 		self.rows[i] & self.cols[j] & self.sqrs[get_sqr_index(i, j)]
 	}
 
 
 	fn set_possible(&mut self){
+		/* Initializes the possible values
+		 * PRE: self.rows/cols/sqrs have all their values set to ALL
+		 */
 		let mut val;
-
-		self.rows = [ALL; S_U];
-		self.cols = [ALL; S_U];
-		self.sqrs = [ALL; S_U];
 
 		for i in 0..S_U {
 			for j in 0..S_U {
@@ -193,6 +190,9 @@ impl Sudoku {
 	}
 
 	fn update(&mut self, index: usize){
+		/* Removes board[index] from the possibilities in its
+		 * row / col / sqr
+		 */
 		let (i, j) = coord(index);
 		let mask = ALL ^ self.board[index];
 
@@ -202,18 +202,24 @@ impl Sudoku {
 	}
 
 	fn set_forced(&mut self) -> u8{
+		/* Does 1 iteration through the board setting all the tiles with just 1 possibility
+		 * Returns:
+		 *	0 if there were no changes
+		 *	1 if there was at least one change
+		 *	2 if the board is unsolvable
+		 */
 		let mut updated = 0;
 		let mut next_remeaning: Vec<usize> = Vec::with_capacity(self.remeaning.len());
 
-		for val in self.remeaning.iter() {
-			let (i, j) = coord(*val);
+		for index in self.remeaning.iter() {
+			let (i, j) = coord(*index);
 			let available = self.rows[i] & self.cols[j] & self.sqrs[get_sqr_index(i, j)];
 
 			if available == 0{
 				return 2;
 			}
 			if is_pow_2(available){
-				self.board[*val] = available;
+				self.board[*index] = available;
 
 				let mask = ALL ^ available;
 
@@ -225,7 +231,7 @@ impl Sudoku {
 
 				unsafe{CHANGES += 1;}
 			}else{
-				next_remeaning.push(*val);
+				next_remeaning.push(*index);
 			}
 
 		}
@@ -237,6 +243,9 @@ impl Sudoku {
 	}
 
 	fn set_all_forced(&mut self) -> bool{
+		/* Calls set_forced until there are no more forced tiles.
+		 * Returns false if the board is unsolvable
+		 */
 		let mut last_updated = 1;
 		
 		while last_updated == 1 {
@@ -250,8 +259,15 @@ impl Sudoku {
 	}
 
 	fn solve(mut s: Sudoku) -> (bool, Sudoku){
+		/*
+		* Main algorithm, tries to set all the forced values
+		* When that is no longer possible, it branches and checks if
+		* the resulting sudokus are solvable, it tries to reach as deep as
+		* possible in each branch. It is recursive. Returns false, _ if the
+		* sudoku is invalid
+    	*/
 		unsafe {NODES += 1;}
-		
+
 		if s.remeaning.len() == 0{
 			return (true, s);
 		}
@@ -265,10 +281,14 @@ impl Sudoku {
 		}else{
 
 			let index = s.remeaning.pop().expect("NO ELEMS");
-			let (ls, count) = ls_of_possible(s.possible(index));
+			let possible = s.possible(index);
+			let mut val: Value;
 			
-			for i in 0..count{
-				let val = ls[i];
+			for i in 0..S{
+				val = 1 << i;
+				if val & possible == 0{
+					continue
+				}
 				let mut new_sud = s.clone();
 
 				new_sud.board[index] = val;
@@ -288,6 +308,8 @@ impl Sudoku {
 /*-------------------------GENERATOR----------------------------*/
 
 fn gen_sudoku() -> Sudoku{
+	/* Generates the sudoku, it is hard coded */
+
 	let s: [Value; SS] = 
 		[0, 2, 4,  0, 0, 0,  0, 0, 0, 
 		0, 0, 0,  0, 0, 7,  1, 0, 0,
@@ -325,9 +347,9 @@ fn gen_sudoku() -> Sudoku{
 
 	Sudoku{
 		board: from_s, 
-		cols: [0; S_U], 
-		rows: [0; S_U], 
-		sqrs: [0; S_U], 
+		cols: [ALL; S_U], 
+		rows: [ALL; S_U], 
+		sqrs: [ALL; S_U], 
 		remeaning: v}
 }
 
@@ -339,12 +361,12 @@ fn main() {
 	s.set_possible();
 
 	println!("{}", s.print_sudoku());
-	println!("{}, {}", s.is_valid(), s.filled_squares());
+	println!("{}, {}", s.is_valid(), s.filled_tiles());
 	
 	let (_, res) = Sudoku::solve(s);
 
 	println!("{}", res.print_sudoku());
-	println!("{}, {}", res.is_valid(), res.filled_squares());
+	println!("{}, {}", res.is_valid(), res.filled_tiles());
 	
 	unsafe{
 		println!("Total changes: {:?}", CHANGES);

@@ -12,6 +12,13 @@ const ALL Value = (1 << uint(S)) - 1
 
 type Value uint
 
+
+/* This is the main struct of the program.
+ * It stores the board, a list with all possible values for each
+ * row / col / sqr and a list of the remaning indices in the board.
+ * It stores each value as a power of 2, the posibles values are just
+ * |s of all the possibilities
+ */
 type Sudoku struct{
 	board [SS]Value
 	colsAv [S]Value
@@ -21,6 +28,7 @@ type Sudoku struct{
 
 /*-------------------------GLOBAL----------------------------*/
 
+//To count the nodes and changes made
 var forcedChanges int
 var calls int
 
@@ -31,6 +39,7 @@ var counter int
 
 
 func GenSud() (s Sudoku){
+	/* Generates the sudoku, it is hard coded */
 	temp_counter := 0
 	
 	sud := [S][S]Value{
@@ -62,7 +71,8 @@ func GenSud() (s Sudoku){
 
 /*---------------------HELPER------------------------*/
 
-func base10(v Value) int{
+func log2(v Value) int{
+	/* Returns 1 + log2(n) or 0*/
 	if v == 0{
 		return 0
 	}else{
@@ -76,7 +86,7 @@ func base10(v Value) int{
 }
 
 
-//I think this functions are inlined automagically
+
 func index(i, j int) int{
 	return S*i + j
 }
@@ -95,6 +105,7 @@ func isPow2(v Value) bool{
 
 
 func (self Sudoku) PrintSudoku() string{
+	/* String representation of the Sudoku. TODO: Implement it as a to_string() */
 	str := "--------------------\n"
 	for i := 0; i < S; i++ {
 		sSmall := ""
@@ -103,7 +114,7 @@ func (self Sudoku) PrintSudoku() string{
 			if self.board[index(i, j)] == 0{
 				sSmall += "- "
 			}else{
-				sSmall += strconv.Itoa(base10(self.board[index(i, j)])) + " "
+				sSmall += strconv.Itoa(log2(self.board[index(i, j)])) + " "
 			}
 
 			if j % R == R - 1{
@@ -119,10 +130,11 @@ func (self Sudoku) PrintSudoku() string{
 		}
 	}
 
-	return str + "--------------------" + strconv.Itoa(self.filledSquares()) + "/" + strconv.Itoa(SS)
+	return str + "--------------------" + strconv.Itoa(self.filledTiles()) + "/" + strconv.Itoa(SS)
 }
 
-func (self Sudoku) filledSquares() int{
+func (self Sudoku) filledTiles() int{
+	/* Returns the number of filled tiles */
 	t := 0
 	for i := 0; i < SS; i++ {
 		if self.board[i] != 0{
@@ -133,6 +145,7 @@ func (self Sudoku) filledSquares() int{
 }
 
 func (self Sudoku) finished() bool{
+	/* Returns true if all the tiles are set, false otherwise */
 	for i := 0; i < SS; i++ {
 		if self.board[i] == 0{
 			return false
@@ -143,6 +156,7 @@ func (self Sudoku) finished() bool{
 }
 
 func (self Sudoku) verifySudoku() bool{
+	/* Returns if a sudoku is valid */
 	var sum Value
 	if ! self.finished(){
 		return false
@@ -196,19 +210,11 @@ func (self Sudoku) verifySudoku() bool{
 
 /*--------------------------SOLVER-----------------------------*/
 
-func lsOfPossible(v Value) []Value{
-	var count int
-	var ls [S]Value
-	for i := 0; i < S; i++ {
-		if ((1<<uint(i)) & v) != 0{
-			ls[count] = (1<<uint(i))
-			count++
-		}
-	}
-	return ls[:count]
-}
-
 func (self Sudoku) canBeFinished() bool{
+	/* Returns if a sudoku can be finished. true DOES NOT imply it can be finished.
+	 * a sudoku cant be finished if one of the remaning tiles to fill has got no
+	 * possibilities
+	 */
 	for i := 0; i < counter; i++{
 		if self.board[remeaning[i]] == 0 && self.possible(remeaning[i]) == 0{
 			return false
@@ -218,13 +224,15 @@ func (self Sudoku) canBeFinished() bool{
 	return true
 }
 
+
 func (self Sudoku) possible(index int) Value{
-	i := index / S
-	j := index % S
+	/* Returns the possible values for a given index */
+	i, j := coord(index)
 	return self.rowsAv[i] & self.colsAv[j] & self.sqrsAv[getSqrIndex(i, j)]
 }
 
-func setPossible(s *Sudoku){ //This function is only called 1 time
+func setPossible(s *Sudoku){
+	/* Initializes rows, cols, sqrs with the possibilities */
 	var tempRows, tempCols, tempSqrs [S]Value
 	var val Value
 
@@ -245,6 +253,7 @@ func setPossible(s *Sudoku){ //This function is only called 1 time
 }
 
 func updateOne(index int, s *Sudoku){
+	/* Removes board[index] from the possible values in its row / col / sqr */
 	i, j := coord(index)
 
 	s.rowsAv[i] &= ALL ^ s.board[index]
@@ -254,6 +263,12 @@ func updateOne(index int, s *Sudoku){
 
 
 func setForced(s *Sudoku) int{
+	/* Does 1 iteration through the board setting all the tiles with just 1 possibility
+	 * Returns:
+	 *	0 if there were no changes
+	 *	1 if there was at least one change
+	 *	2 if the board is unsolvable
+	 */
 	var i, j int
 	var val int
 	var available, mask Value
@@ -290,6 +305,9 @@ func setForced(s *Sudoku) int{
 }
 
 func setAllForced(s *Sudoku) bool{
+	/* Calls set_forced until there are no more forced tiles.
+	 * Returns false if the board is unsolvable
+	 */
 	for lastUpdate := 1; lastUpdate == 1;{
 		lastUpdate = setForced(s)
 		if lastUpdate == 2{
@@ -301,7 +319,13 @@ func setAllForced(s *Sudoku) bool{
 
 
 func (self Sudoku) solve() (bool, Sudoku){
-	//Returns false, _ if it cannot find a solution following this branch
+	/*
+	* Main algorithm, tries to set all the forced values
+	* When that is no longer possible, it branches and checks if
+	* the resulting sudokus are solvable, it tries to reach as deep as
+	* possible in each branch. It is recursive. Returns false, _ if the
+	* sudoku is invalid
+	*/
 	calls++
 
 	isPos := setAllForced(&self)
@@ -313,21 +337,26 @@ func (self Sudoku) solve() (bool, Sudoku){
 		return true, self
 	}
 	
-	//Faster in #3, #5
+	//Faster in some cases
 	var index int
 	for i := counter - 1; self.board[index] != 0 && i >= 0; i-- {
 		index = remeaning[i]	
 	}
 	
-	//Faster in #4
+	//Alternative, some further testing is required to determine which one to use
 	/*
 	for i := 0; s.board[index] != 0 && i < counter; i++ {
 		index = remeaning[i]	
 	}
 	*/
+	var allPos Value = self.possible(index)
+	var val Value
+	for i := 0; i < S; i++ {
+		val = (1 << uint(i))
+		if val & allPos == 0{
+			continue
+		}
 
-
-	for _, val := range lsOfPossible(self.possible(index)) {
 		newS := Sudoku(self) //Duplicates s
 		newS.board[index] = val
 		updateOne(index, &newS)
@@ -353,7 +382,7 @@ func SolveMaster(s Sudoku) (Sudoku, /*ok*/ bool, /*forcedChanges*/ int, /*calls*
 	}
 	_, rs = rs.solve()
 
-	ok := rs.filledSquares() == SS && rs.verifySudoku()
+	ok := rs.filledTiles() == SS && rs.verifySudoku()
 
 	return rs, ok, forcedChanges, calls
 }

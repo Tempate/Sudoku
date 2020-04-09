@@ -53,13 +53,11 @@ void test_solver() {
 
     for (const auto value : board_values) {
         Board board{value};
-        board.print();
-
         solve(board);
 
         assert(board.complete());
         assert(board.check());
     }
 
-    std::cout << "[+] Tests completed successfully" << std::endl;
+    std::cout << "[+] Successfully completed 4 solving tests" << std::endl;
 }

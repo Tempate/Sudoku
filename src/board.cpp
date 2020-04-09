@@ -10,11 +10,10 @@ void Board::print() const {
 
     for (const auto row : values) {
         for (const int sqr : row) {
-            if (sqr) {
-                std::cout << "   ";
-            } else {
-                std::cout << " " << sqr << " ";
-            }
+            if (sqr == 0)
+                std::cout << "  ";
+            else
+                std::cout << " " << sqr;
         }
 
         std::cout << std::endl;

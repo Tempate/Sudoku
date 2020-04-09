@@ -3,9 +3,8 @@
 
 #include "tests.h"
 
-using namespace std::chrono;
-
 void benchmark_solver() {
+    using namespace std::chrono;
     const auto start = high_resolution_clock::now();
 
     test_solver();

@@ -7,17 +7,26 @@ LINKER  = g++
 
 EXEC    = Sudoku
 SRCDIR  = src
-OBJDIR  = obj
+TSTDIR  = tests
+OBJDIR_SRC = obj/src
+OBJDIR_TST = obj/tests
 BINDIR  = bin
 
-SOURCES  := $(wildcard $(SRCDIR)/*.cpp)
+SOURCES  := $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(TSTDIR)/*.cpp)
 INCLUDES := $(wildcard $(SRCDIR)/*.h)
-OBJECTS  := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+OBJECTS  := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR_SRC)/%.o)
+OBJECTS  := $(OBJECTS:$(TSTDIR)/%.cpp=$(OBJDIR_TST)/%.o)
 
-$(BINDIR)/$(EXEC): $(BINDIR) $(OBJDIR) $(OBJECTS)
+$(BINDIR)/$(EXEC): $(BINDIR) $(OBJDIR_SRC) $(OBJECTS)
 	@$(LINKER) -o $@ $(OBJECTS) $(LDFLAGS)
 
-$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp
+$(BINDIR)/$(EXEC): $(BINDIR) $(OBJDIR_TST) $(OBJECTS)
+	@$(LINKER) -o $@ $(OBJECTS) $(LDFLAGS)
+
+$(OBJECTS): $(OBJDIR_SRC)/%.o : $(SRCDIR)/%.cpp
+	@$(CXX) $(FLAGS) -c $< -o $@
+
+$(OBJECTS): $(OBJDIR_TST)/%.o : $(TSTDIR)/%.cpp
 	@$(CXX) $(FLAGS) -c $< -o $@
 
 release:
@@ -30,7 +39,8 @@ bin:
 	mkdir -p $(BINDIR)
 
 obj:
-	mkdir -p $(OBJDIR)
+	mkdir -p $(OBJDIR_SRC)
+	mkdir -p $(OBJDIR_TST)
 
 clean:
 	rm -f $(OBJECTS)

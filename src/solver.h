@@ -10,7 +10,7 @@ struct Square {
 
     Square(const int x, const int y): x{x}, y{y} {
         // The z coordinate is the quadrant
-        z = (y << 4) + x;
+        z = 3 * (y / 3) + x / 3;
     }
 
     int getPossible(const Board &board) const {
@@ -24,7 +24,7 @@ bool dfs(Board &board, const std::vector<Square> &blanks, int index);
 void calculatePossible(Board &board);
 void updatePossible(Board &board, const Square &sqr);
 
-std::vector<Square> genBlankSquares(Board &board);
+std::vector<Square> genBlankSquares(const Board &board);
 int nextPossibleValue(const Board &board, const Square &sqr, const int current);
 int setForced(Board &board, const std::vector<Square> &blanks, const int index);
 

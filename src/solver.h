@@ -19,14 +19,14 @@ struct Square {
 };
 
 void solve(Board &board);
-bool dfs(Board &board, std::vector<Square> &blanks, int index);
+bool dfs(Board &board, const std::vector<Square> &blanks, int index);
 
 void calculatePossible(Board &board);
 void updatePossible(Board &board, const Square &sqr);
 
 std::vector<Square> genBlankSquares(Board &board);
 int nextPossibleValue(const Board &board, const Square &sqr, const int current);
-int setForced(Board &board, std::vector<Square> &blanks, const int index);
+int setForced(Board &board, const std::vector<Square> &blanks, const int index);
 
 #endif /* SOLVER_H */
 

@@ -21,6 +21,8 @@ class Board {
     std::array<int, WIDTH> rowsPossible;
     std::array<int, QUADRANTS> quadPossible;
 
+    Board() {};
+
     Board(const std::array<std::array<int, WIDTH>, HEIGHT> values):
     values{values} {};
 

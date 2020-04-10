@@ -10,7 +10,7 @@ void benchmark_solver() {
     test_solver();
     
     const auto current = high_resolution_clock::now();
-    const double elapsed = duration_cast<milliseconds>(current - start).count();
+    const double elapsed = duration_cast<microseconds>(current - start).count();
     
-    std::cout << "Time: " << elapsed << std::endl;
+    std::cout << "Time: " << (double) elapsed << "ms" << std::endl;
 }

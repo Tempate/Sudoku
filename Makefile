@@ -12,21 +12,21 @@ OBJDIR_SRC = obj/src
 OBJDIR_TST = obj/tests
 BINDIR  = bin
 
-SOURCES  := $(wildcard $(SRCDIR)/*.cpp) $(wildcard $(TSTDIR)/*.cpp)
+SOURCES  := $(wildcard $(SRCDIR)/*.cpp)
 INCLUDES := $(wildcard $(SRCDIR)/*.h)
-OBJECTS  := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR_SRC)/%.o)
-OBJECTS  := $(OBJECTS:$(TSTDIR)/%.cpp=$(OBJDIR_TST)/%.o)
 
-$(BINDIR)/$(EXEC): $(BINDIR) $(OBJDIR_SRC) $(OBJECTS)
-	@$(LINKER) -o $@ $(OBJECTS) $(LDFLAGS)
+TESTS    := $(wildcard $(TSTDIR)/*.cpp)
 
-$(BINDIR)/$(EXEC): $(BINDIR) $(OBJDIR_TST) $(OBJECTS)
-	@$(LINKER) -o $@ $(OBJECTS) $(LDFLAGS)
+OBJECTS_SRC := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR_SRC)/%.o)
+OBJECTS_TST := $(TESTS:$(TSTDIR)/%.cpp=$(OBJDIR_TST)/%.o)
 
-$(OBJECTS): $(OBJDIR_SRC)/%.o : $(SRCDIR)/%.cpp
+$(BINDIR)/$(EXEC): $(BINDIR) $(OBJDIR_SRC) $(OBJECTS_SRC) $(OBJDIR_TST) $(OBJECTS_TST)
+	@$(LINKER) -o $@ $(OBJECTS_SRC) $(OBJECTS_TST) $(LDFLAGS)
+
+$(OBJECTS_SRC): $(OBJDIR_SRC)/%.o : $(SRCDIR)/%.cpp
 	@$(CXX) $(FLAGS) -c $< -o $@
 
-$(OBJECTS): $(OBJDIR_TST)/%.o : $(TSTDIR)/%.cpp
+$(OBJECTS_TST): $(OBJDIR_TST)/%.o : $(TSTDIR)/%.cpp
 	@$(CXX) $(FLAGS) -c $< -o $@
 
 release:
@@ -43,6 +43,7 @@ obj:
 	mkdir -p $(OBJDIR_TST)
 
 clean:
-	rm -f $(OBJECTS)
+	rm -f $(OBJECTS_SRC)
+	rm -f $(OBJECTS_TST)
 
 .PHONY: clean

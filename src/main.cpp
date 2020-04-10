@@ -7,7 +7,6 @@
 using namespace std::chrono;
 
 int main() {
-    test_solver();
     benchmark_solver();
     
     return EXIT_SUCCESS;

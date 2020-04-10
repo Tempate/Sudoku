@@ -1,63 +1,44 @@
 #include <iostream>
 #include <cassert>
+#include <fstream>
+#include <sstream>
+#include <string>
 #include <array>
 #include <vector>
 
 #include "../src/board.h"
 #include "../src/solver.h"
 
-void test_solver() {
-    static const std::vector<std::array<std::array<int, WIDTH>, HEIGHT>> board_values = {{
-        {{
-            {0,0,3,0,0,1,7,2,0},
-            {0,0,0,0,0,4,0,0,0},
-            {0,0,0,7,0,0,1,4,9},
-            {0,1,4,8,0,0,0,0,5},
-            {2,8,0,0,0,0,0,7,4},
-            {7,0,0,0,0,2,6,8,0},
-            {9,5,2,0,0,8,0,0,0},
-            {0,0,0,3,0,0,0,0,0},
-            {0,6,7,9,0,0,4,0,0}
-        }}, {{
-            {0,0,5,8,0,0,0,0,7},
-            {4,0,0,0,0,0,0,0,0},
-            {0,0,0,0,3,0,0,2,8},
-            {2,0,0,0,0,4,5,0,0},
-            {0,0,4,0,0,0,0,0,0},
-            {0,0,0,0,7,6,0,3,0},
-            {8,0,1,7,0,0,4,0,0},
-            {0,0,2,1,8,0,0,0,0},
-            {7,0,0,0,0,0,3,8,0}
-        }}, {{
-            {0,0,0,2,0,0,0,0,0},
-            {0,0,0,0,0,8,4,0,0},
-            {0,7,0,4,0,0,8,9,0},
-            {0,0,0,0,5,0,0,1,0},
-            {0,1,0,0,0,0,0,0,0},
-            {0,0,3,0,0,6,0,0,2},
-            {0,3,0,0,0,5,7,0,8},
-            {8,0,0,0,3,0,0,0,0},
-            {0,6,1,0,0,0,0,4,0}
-        }}, {{
-            {0,2,4,0,0,0,0,0,0},
-            {0,0,0,0,0,7,1,0,0},
-            {0,9,0,0,0,0,0,0,0},
-            {0,0,0,0,0,0,0,8,4},
-            {0,0,0,0,7,5,0,0,0},
-            {6,0,0,0,3,0,0,0,0},
-            {0,0,0,4,0,0,0,2,9},
-            {0,0,0,2,0,0,3,0,0},
-            {1,0,0,0,0,0,0,0,0}
-        }}
-    }};
+std::vector<Board> parse_file(const std::string filename) {
+    std::ifstream infile(filename);
+    std::vector<Board> boards;
 
-    for (const auto value : board_values) {
-        Board board{value};
+    std::string line;
+
+    while (std::getline(infile, line)) {
+        Board board;
+        int i = 0;
+
+        for (int y = 0; y < HEIGHT; y++) {
+            for (int x = 0; x < WIDTH; x++, i++)
+                board.values[y][x] = (line[i] == '.') ? 0 : line[i] - '0';
+        }
+
+        boards.push_back(board);
+    }
+
+    return boards;
+}
+
+void test_solver() {
+    const auto boards = parse_file("tests/sudokus.txt");
+
+    for (auto board : boards) {
         solve(board);
 
         assert(board.complete());
         assert(board.check());
     }
 
-    std::cout << "[+] Successfully completed 4 solving tests" << std::endl;
+    std::cout << "[+] Successfully solved " << boards.size() << " sudoku-boards" << std::endl;
 }

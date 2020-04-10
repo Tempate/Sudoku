@@ -1,9 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
+#include <cassert>
 #include <vector>
 
 #include "main.h"
@@ -16,34 +11,24 @@
 
 
 void solve(Board &board) {
-    calculatePossible(board);
-    dfs(board, genBlankSquares(board), 0);
+    dfs(board, init(board), 0);
 }
 
-std::vector<Square> genBlankSquares(const Board &board) {
+std::vector<Square> init(Board &board) {
     std::vector<Square> blanks;
 
-    for (int y = 0; y < HEIGHT; y++) {
-        for (int x = 0; x < WIDTH; x++) {
-            if (board.values[y][x] == 0)
-                blanks.emplace_back(x, y);
-        }
-    }
-
-    return blanks;
-}
-
-void calculatePossible(Board &board) {
     // Saves values that aren't possible for each row, column and quadrant
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             if (board.values[y][x] != 0) {
+                const int bin = toBinary(board.values[y][x]);
                 const Square sqr{x, y};
 
-                board.colsPossible[sqr.x] |= pow2(board.values[y][x]);
-                board.rowsPossible[sqr.y] |= pow2(board.values[y][x]);
-                board.quadPossible[sqr.z] |= pow2(board.values[y][x]);
-            }
+                board.colsPossible[sqr.x] |= bin;
+                board.rowsPossible[sqr.y] |= bin;
+                board.quadPossible[sqr.z] |= bin;
+            } else
+                blanks.emplace_back(x, y);
         }
     }
     
@@ -56,14 +41,20 @@ void calculatePossible(Board &board) {
 
     for (int i = 0; i < QUADRANTS; i++)
         board.quadPossible[i] ^= MAX;
+
+    return blanks;
 }
 
 bool dfs(Board &board, const std::vector<Square> &blanks, const int index) {
-    if (index >= blanks.size()) 
+    assert(index >= 0);
+
+    if (index >= blanks.size()) {
+        assert(board.check());
         return true;
+    }
     
     Square sqr = blanks[index];
-    
+
     // Jumps to the next tile if the current one is already set
     if (board.values[sqr.y][sqr.x] != 0)
         return dfs(board, blanks, index + 1);
@@ -73,7 +64,10 @@ bool dfs(Board &board, const std::vector<Square> &blanks, const int index) {
     while (v != 0) {
         Board newBoard = board;
         newBoard.values[sqr.y][sqr.x] = v;
-        
+
+        assert(board.values[sqr.y][sqr.x] == 0);
+        assert(newBoard.values[sqr.y][sqr.x] != 0);
+
         updatePossible(newBoard, sqr);
         
         int state;
@@ -83,6 +77,7 @@ bool dfs(Board &board, const std::vector<Square> &blanks, const int index) {
         } while (state == MODIFIED);
         
         if (state != DEAD_END && dfs(newBoard, blanks, index + 1)) {
+            assert(newBoard.check());
             board = newBoard;
             return true;
         }
@@ -90,14 +85,12 @@ bool dfs(Board &board, const std::vector<Square> &blanks, const int index) {
         v = nextPossibleValue(board, sqr, v);
     }
 
-    // There was no possible value to be chosen
     return false;
 }
 
-// PRE: board.values[sqr.y][sqr.x] != 0
 void updatePossible(Board &board, const Square &sqr) {
     assert(board.values[sqr.y][sqr.x] != 0);
-    const int possible = MAX ^ pow2(board.values[sqr.y][sqr.x]);
+    const int possible = MAX ^ toBinary(board.values[sqr.y][sqr.x]);
 
     board.colsPossible[sqr.x] &= possible;
     board.rowsPossible[sqr.y] &= possible;
@@ -109,7 +102,7 @@ int nextPossibleValue(const Board &board, Square &sqr, const int value) {
     const int possible = sqr.updatePossible(board);
 
     for (int k = value + 1; k <= RANGE; k++) {
-        if (possible & pow2(k))
+        if (possible & toBinary(k))
             return k;
     }
 
@@ -130,7 +123,7 @@ int setForced(Board &board, const std::vector<Square> &blanks, const int index) 
 
         switch (phaseState) {
         case MODIFIED:
-            board.values[sqr.y][sqr.x] = log2plus1(sqr.possible);
+            board.values[sqr.y][sqr.x] = fromBinary(sqr.possible);
             updatePossible(board, sqr);
             state = MODIFIED;
             break;

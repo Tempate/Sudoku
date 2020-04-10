@@ -16,9 +16,8 @@
 
 
 void solve(Board &board) {
-    const std::vector<Square> blanks = genBlankSquares(board);
     calculatePossible(board);
-    dfs(board, blanks, 0);
+    dfs(board, genBlankSquares(board), 0);
 }
 
 std::vector<Square> genBlankSquares(const Board &board) {
@@ -63,7 +62,7 @@ bool dfs(Board &board, const std::vector<Square> &blanks, const int index) {
     if (index >= blanks.size()) 
         return true;
     
-    const Square sqr = blanks[index];
+    Square sqr = blanks[index];
     
     // Jumps to the next tile if the current one is already set
     if (board.values[sqr.y][sqr.x] != 0)
@@ -106,8 +105,8 @@ void updatePossible(Board &board, const Square &sqr) {
 }
 
 // Returns 0 when there are no possible values left
-int nextPossibleValue(const Board &board, const Square &sqr, const int value) {
-    const int possible = sqr.getPossible(board);
+int nextPossibleValue(const Board &board, Square &sqr, const int value) {
+    const int possible = sqr.updatePossible(board);
 
     for (int k = value + 1; k <= RANGE; k++) {
         if (possible & pow2(k))
@@ -121,17 +120,17 @@ int setForced(Board &board, const std::vector<Square> &blanks, const int index) 
     int state = UNMODIFIED;
     
     for (int i = index; i < blanks.size() && state != DEAD_END; i++) {
-        const Square sqr = blanks[i];
-        const int possible = sqr.getPossible(board);
+        Square sqr = blanks[i];
+        sqr.updatePossible(board);
 
         if (board.values[sqr.y][sqr.x])
             continue;
 
-        const int phaseState = 2 - __builtin_popcount(possible);
+        const int phaseState = 2 - __builtin_popcount(sqr.possible);
 
         switch (phaseState) {
         case MODIFIED:
-            board.values[sqr.y][sqr.x] = log2plus1(possible);
+            board.values[sqr.y][sqr.x] = log2plus1(sqr.possible);
             updatePossible(board, sqr);
             state = MODIFIED;
             break;

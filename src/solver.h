@@ -8,13 +8,20 @@ struct Square {
     int y;
     int z;
 
+    int possible;
+
     Square(const int x, const int y): x{x}, y{y} {
-        // The z coordinate is the quadrant
-        z = 3 * (y / 3) + x / 3;
+        z = 3 * (y / 3) + x / 3; // The z coordinate is the quadrant
     }
 
-    int getPossible(const Board &board) const {
-        return board.colsPossible[x] & board.rowsPossible[y] & board.quadPossible[z];
+    Square(const Board &board, const int x, const int y): x{x}, y{y} {
+        z = 3 * (y / 3) + x / 3;
+        updatePossible(board);
+    }
+
+    int updatePossible(const Board &board) {
+        possible = board.colsPossible[x] & board.rowsPossible[y] & board.quadPossible[z];
+        return possible;
     }
 };
 
@@ -25,7 +32,7 @@ void calculatePossible(Board &board);
 void updatePossible(Board &board, const Square &sqr);
 
 std::vector<Square> genBlankSquares(const Board &board);
-int nextPossibleValue(const Board &board, const Square &sqr, const int current);
+int nextPossibleValue(const Board &board, Square &sqr, const int current);
 int setForced(Board &board, const std::vector<Square> &blanks, const int index);
 
 #endif /* SOLVER_H */

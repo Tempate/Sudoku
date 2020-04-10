@@ -8,8 +8,8 @@
 #define WIDTH 9
 #define RANGE 9
 
-#define SQR 3
-#define QUADRANTS WIDTH * HEIGHT / (SQR * SQR)
+#define QUADRANT 3
+#define QUADRANTS WIDTH * HEIGHT / (QUADRANT * QUADRANT)
 
 #define MAX (1 << RANGE) - 1
 
@@ -17,9 +17,9 @@ class Board {
     public:
     std::array<std::array<int, WIDTH>, HEIGHT> values;
 
-    std::array<int, HEIGHT> colsPossible;
-    std::array<int, WIDTH> rowsPossible;
-    std::array<int, QUADRANTS> quadPossible;
+    std::array<int, HEIGHT> colsPossible = {0};
+    std::array<int, WIDTH> rowsPossible = {0};
+    std::array<int, QUADRANTS> quadPossible = {0};
 
     Board() {};
 

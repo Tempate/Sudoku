@@ -124,6 +124,6 @@ void test_board_check() {
     for (const auto value : right_board_values) {
         Board board{value};
         assert(board.complete());
-        assert(!board.check());
+        assert(board.check());
     }
 }

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <array>
+#include <vector>
 
 #include "main.h"
 #include "board.h"
@@ -76,4 +77,43 @@ bool Board::check() const {
     }
 
     return true;
+}
+
+std::vector<Square> Board::genBlankSquares() const {
+    std::vector<Square> blanks;
+
+    for (int y = 0; y < HEIGHT; y++) {
+        for (int x = 0; x < WIDTH; x++) {
+            if (values[y][x] == 0)
+                blanks.emplace_back(x, y);
+        }
+    }
+
+    return blanks;
+}
+
+void Board::calculatePossible() {
+    // Saves values that aren't possible for each row, column and quadrant
+    for (int y = 0; y < HEIGHT; y++) {
+        for (int x = 0; x < WIDTH; x++) {
+            if (values[y][x] != 0) {
+                const int bin = toBinary(values[y][x]);
+                const Square sqr{x, y};
+
+                colsPossible[sqr.x] |= bin;
+                rowsPossible[sqr.y] |= bin;
+                quadPossible[sqr.z] |= bin;
+            }
+        }
+    }
+    
+    // Invert them to get the possible
+    for (int i = 0; i < WIDTH; i++)
+        colsPossible[i] ^= MAX;
+
+    for (int i = 0; i < HEIGHT; i++)
+        rowsPossible[i] ^= MAX;
+
+    for (int i = 0; i < QUADRANTS; i++)
+        quadPossible[i] ^= MAX;
 }

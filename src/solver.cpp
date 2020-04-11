@@ -11,38 +11,8 @@
 
 
 void solve(Board &board) {
-    dfs(board, init(board), 0);
-}
-
-std::vector<Square> init(Board &board) {
-    std::vector<Square> blanks;
-
-    // Saves values that aren't possible for each row, column and quadrant
-    for (int y = 0; y < HEIGHT; y++) {
-        for (int x = 0; x < WIDTH; x++) {
-            if (board.values[y][x] != 0) {
-                const int bin = toBinary(board.values[y][x]);
-                const Square sqr{x, y};
-
-                board.colsPossible[sqr.x] |= bin;
-                board.rowsPossible[sqr.y] |= bin;
-                board.quadPossible[sqr.z] |= bin;
-            } else
-                blanks.emplace_back(x, y);
-        }
-    }
-    
-    // Inverts them to get the possible
-    for (int i = 0; i < WIDTH; i++)
-        board.colsPossible[i] ^= MAX;
-
-    for (int i = 0; i < HEIGHT; i++)
-        board.rowsPossible[i] ^= MAX;
-
-    for (int i = 0; i < QUADRANTS; i++)
-        board.quadPossible[i] ^= MAX;
-
-    return blanks;
+    board.calculatePossible();
+    dfs(board, board.genBlankSquares(), 0);
 }
 
 bool dfs(Board &board, const std::vector<Square> &blanks, const int index) {
@@ -112,26 +82,79 @@ int nextPossibleValue(const Board &board, Square &sqr, const int value) {
 int setForced(Board &board, const std::vector<Square> &blanks, const int index) {
     int state = UNMODIFIED;
     
-    for (int i = index; i < blanks.size() && state != DEAD_END; i++) {
+    for (int i = index; i < blanks.size(); i++) {
         Square sqr = blanks[i];
-        sqr.updatePossible(board);
 
         if (board.values[sqr.y][sqr.x])
             continue;
 
-        const int phaseState = 2 - __builtin_popcount(sqr.possible);
+        sqr.updatePossible(board);
 
-        switch (phaseState) {
-        case MODIFIED:
-            board.values[sqr.y][sqr.x] = fromBinary(sqr.possible);
-            updatePossible(board, sqr);
-            state = MODIFIED;
-            break;
-        case DEAD_END:
-            state = DEAD_END;
-            break;
-        }
+        if (!sqr.possible)
+            return DEAD_END;
+            
+        if ((setForcedTile(board, sqr, sqr.possible) == MODIFIED) || 
+            (setForcedInRow(board, sqr)              == MODIFIED) ||
+            (setForcedInColumn(board, sqr)           == MODIFIED) ||
+            (setForcedInQuadrant(board, sqr)         == MODIFIED))
+           state = MODIFIED;
     }
 
     return state;
+}
+
+int setForcedTile(Board &board, const Square &sqr, const int possible) {
+    if (__builtin_popcount(possible) != 1)    
+        return UNMODIFIED;
+
+    board.values[sqr.y][sqr.x] = fromBinary(possible);
+    updatePossible(board, sqr);
+    return MODIFIED;
+}
+
+int setForcedInRow(Board &board, const Square &sqr) {
+    int possible = sqr.possible;
+
+    for (int x = 0; x < WIDTH; x++) {
+        if (board.values[sqr.y][x] != 0 || x == sqr.x)
+            continue;
+
+        Square aux{board, x, sqr.y};
+        possible &= MAX ^ aux.possible;
+    }
+
+    return setForcedTile(board, sqr, possible);
+}
+
+int setForcedInColumn(Board &board, const Square &sqr) {
+    int possible = sqr.possible;
+
+    for (int y = 0; y < HEIGHT; y++) {
+        if (board.values[y][sqr.x] != 0 || y == sqr.y)
+            continue;
+
+        Square aux{board, sqr.x, y};
+        possible &= MAX ^ aux.possible;
+    }
+
+    return setForcedTile(board, sqr, possible);
+}
+
+int setForcedInQuadrant(Board &board, const Square &sqr) {
+    int possible = sqr.possible;
+
+    const int y0 = 3 * (sqr.y / 3);
+    const int x0 = 3 * (sqr.x / 3);
+
+    for (int y = y0; y < y0 + 3; y++) {
+        for (int x = x0; x < x0 + 3; x++) {
+            if (board.values[y][x] != 0 || (x == sqr.x && y == sqr.y))
+                continue;
+
+            Square aux{board, x, y};
+            possible &= MAX ^ aux.possible;
+        }
+    }
+
+    return setForcedTile(board, sqr, possible);
 }

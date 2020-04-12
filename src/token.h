@@ -6,7 +6,7 @@ struct Token;
 #include "board.h"
 
 static inline int calcRegion(const int x, const int y) {
-    return 3 * (y / 3) + x / 3;
+    return REGION * (y / REGION) + x / REGION;
 }
 
 struct Token {

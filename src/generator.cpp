@@ -13,7 +13,7 @@ Board generateBoard() {
     board.calculatePossible();
 
     // Set a few random values
-    while (blanks.size() > 64) {
+    while (blanks.size() > (WIDTH - 1) * (HEIGHT - 1)) {
         Token token = randomPop<Token>(blanks);
         board.fill(token, token.randomValue(board));
 

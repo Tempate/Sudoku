@@ -4,16 +4,20 @@
 #include <iostream>
 #include <array>
 
+class Board;
+
+#include "token.h"
+
 #define HEIGHT 9
 #define WIDTH 9
 #define RANGE 9
 
-#define QUADRANT 3
-#define QUADRANTS WIDTH * HEIGHT / (QUADRANT * QUADRANT)
+#define REGION 3
+#define REGIONS WIDTH * HEIGHT / (REGION * REGION)
 
 #define MAX (1 << RANGE) - 1
 
-struct Square;
+enum {BLANK, NOT_BLANK};
 
 class Board {
     public:
@@ -21,9 +25,9 @@ class Board {
 
     std::array<int, HEIGHT> colsPossible = {0};
     std::array<int, WIDTH> rowsPossible = {0};
-    std::array<int, QUADRANTS> quadPossible = {0};
+    std::array<int, REGIONS> quadPossible = {0};
 
-    Board() {};
+    Board();
 
     Board(const std::array<std::array<int, WIDTH>, HEIGHT> values):
     values{values} {};
@@ -32,34 +36,12 @@ class Board {
     bool complete() const;
     bool check() const;
 
-    std::vector<Square> genBlankSquares() const;
+    int getValue(const Token &token) const;
+    void fill(const Token &token, const int value);
+    std::vector<Token> getTokens(const int type) const;
+    
     void calculatePossible();
-};
-
-static inline int calcQuadrant(const int x, const int y) {
-    return 3 * (y / 3) + x / 3;
-}
-
-struct Square {
-    int x;
-    int y;
-    int z;
-
-    int possible;
-
-    Square(const int x, const int y): x{x}, y{y} {
-        z = calcQuadrant(x, y); // The z coordinate is the quadrant
-    }
-
-    Square(const Board &board, const int x, const int y): x{x}, y{y} {
-        z = calcQuadrant(x, y);
-        updatePossible(board);
-    }
-
-    int updatePossible(const Board &board) {
-        possible = board.colsPossible[x] & board.rowsPossible[y] & board.quadPossible[z];
-        return possible;
-    }
+    void updatePossible(const Token &token);
 };
 
 #endif /* BOARD_H */

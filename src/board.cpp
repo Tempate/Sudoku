@@ -4,19 +4,24 @@
 #include <vector>
 
 #include "main.h"
+#include "token.h"
 #include "board.h"
 
 #define MAX (1 << RANGE) - 1
+
+Board::Board() {
+    values = {{ {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0} }};
+}
 
 void Board::print() const {
     std::cout << std::endl;
 
     for (const auto row : values) {
-        for (const int sqr : row) {
-            if (sqr == 0)
+        for (const int token : row) {
+            if (token == 0)
                 std::cout << " .";
             else
-                std::cout << " " << sqr;
+                std::cout << " " << token;
         }
 
         std::cout << std::endl;
@@ -27,8 +32,8 @@ void Board::print() const {
 
 bool Board::complete() const {
     for (const auto row : values) {
-        for (const int sqr : row) {
-            if (sqr <= 0 || sqr > RANGE)
+        for (const int token : row) {
+            if (token <= 0 || token > RANGE)
                 return false;
         }
     }
@@ -62,12 +67,12 @@ bool Board::check() const {
     }
 
     // Ensure quadrants have an iteration of numbers from 1 to 9
-    for (int i = 0; i < HEIGHT / QUADRANT; i += QUADRANT) {
-        for (int j = 0; j < WIDTH / QUADRANT; j += QUADRANT) {
+    for (int i = 0; i < HEIGHT / REGION; i += REGION) {
+        for (int j = 0; j < WIDTH / REGION; j += REGION) {
             int numbers = 0;
 
-            for (int k = i; k < i + QUADRANT; k++) {
-                for (int l = j; l < j + QUADRANT; l++)
+            for (int k = i; k < i + REGION; k++) {
+                for (int l = j; l < j + REGION; l++)
                     numbers ^= toBinary(values[k][l]);
             }
 
@@ -79,30 +84,46 @@ bool Board::check() const {
     return true;
 }
 
-std::vector<Square> Board::genBlankSquares() const {
-    std::vector<Square> blanks;
+int Board::getValue(const Token &token) const {
+    return values[token.y][token.x];
+}
+
+void Board::fill(const Token &token, const int value) {
+    values[token.y][token.x] = value;
+    updatePossible(token);
+}
+
+std::vector<Token> Board::getTokens(const int type) const {
+    std::vector<Token> squares;
+    squares.reserve(HEIGHT * WIDTH);
 
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
-            if (values[y][x] == 0)
-                blanks.emplace_back(x, y);
+            if (type == BLANK && values[y][x] == 0)
+                squares.emplace_back(x, y);
+            else if (type == NOT_BLANK && values[y][x] != 0)
+                squares.emplace_back(x, y);
         }
     }
 
-    return blanks;
+    return squares;
 }
 
 void Board::calculatePossible() {
+    colsPossible = {0};
+    rowsPossible = {0};
+    quadPossible = {0};
+
     // Saves values that aren't possible for each row, column and quadrant
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             if (values[y][x] != 0) {
                 const int bin = toBinary(values[y][x]);
-                const Square sqr{x, y};
+                const Token token{x, y};
 
-                colsPossible[sqr.x] |= bin;
-                rowsPossible[sqr.y] |= bin;
-                quadPossible[sqr.z] |= bin;
+                colsPossible[token.x] |= bin;
+                rowsPossible[token.y] |= bin;
+                quadPossible[token.z] |= bin;
             }
         }
     }
@@ -114,6 +135,14 @@ void Board::calculatePossible() {
     for (int i = 0; i < HEIGHT; i++)
         rowsPossible[i] ^= MAX;
 
-    for (int i = 0; i < QUADRANTS; i++)
+    for (int i = 0; i < REGIONS; i++)
         quadPossible[i] ^= MAX;
+}
+
+void Board::updatePossible(const Token &token) {
+    const int possible = MAX ^ toBinary(getValue(token));
+
+    colsPossible[token.x] &= possible;
+    rowsPossible[token.y] &= possible;
+    quadPossible[token.z] &= possible;
 }

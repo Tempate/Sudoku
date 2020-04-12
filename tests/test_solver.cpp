@@ -34,10 +34,9 @@ void test_solver() {
     const auto boards = parse_file("tests/sudokus.txt");
 
     for (auto board : boards) {
-        solve(board);
-
+        solve(board, 1);
         assert(board.check());
     }
 
-    std::cout << "[+] Successfully solved " << boards.size() << " sudoku-boards" << std::endl;
+    std::cout << "[+] Successfully solved " << boards.size() << " sudokus" << std::endl;
 }

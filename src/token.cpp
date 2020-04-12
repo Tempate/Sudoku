@@ -5,7 +5,7 @@
 #include "token.h"
 
 int Token::updatePossible(const Board &board) {
-    possible = board.colsPossible[x] & board.rowsPossible[y] & board.quadPossible[z];
+    possible = board.colsPossible[x] & board.rowsPossible[y] & board.regsPossible[z];
     return possible;
 }
 

@@ -10,7 +10,8 @@
 #define MAX (1 << RANGE) - 1
 
 Board::Board() {
-    values = {{ {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0} }};
+    for (int y = 0; y < HEIGHT; y++)
+        values[y] = {0};
 }
 
 void Board::print() const {
@@ -110,9 +111,14 @@ std::vector<Token> Board::getTokens(const int type) const {
 }
 
 void Board::calculatePossible() {
-    colsPossible = {0};
-    rowsPossible = {0};
-    quadPossible = {0};
+    for (int i = 0; i < WIDTH; i++)
+        colsPossible[i] = MAX;
+
+    for (int i = 0; i < HEIGHT; i++)
+        rowsPossible[i] = MAX;
+
+    for (int i = 0; i < REGIONS; i++)
+        regsPossible[i] = MAX;
 
     // Saves values that aren't possible for each row, column and quadrant
     for (int y = 0; y < HEIGHT; y++) {
@@ -121,22 +127,12 @@ void Board::calculatePossible() {
                 const int bin = toBinary(values[y][x]);
                 const Token token{x, y};
 
-                colsPossible[token.x] |= bin;
-                rowsPossible[token.y] |= bin;
-                quadPossible[token.z] |= bin;
+                colsPossible[token.x] ^= bin;
+                rowsPossible[token.y] ^= bin;
+                regsPossible[token.z] ^= bin;
             }
         }
     }
-    
-    // Invert them to get the possible
-    for (int i = 0; i < WIDTH; i++)
-        colsPossible[i] ^= MAX;
-
-    for (int i = 0; i < HEIGHT; i++)
-        rowsPossible[i] ^= MAX;
-
-    for (int i = 0; i < REGIONS; i++)
-        quadPossible[i] ^= MAX;
 }
 
 void Board::updatePossible(const Token &token) {
@@ -144,5 +140,5 @@ void Board::updatePossible(const Token &token) {
 
     colsPossible[token.x] &= possible;
     rowsPossible[token.y] &= possible;
-    quadPossible[token.z] &= possible;
+    regsPossible[token.z] &= possible;
 }

@@ -1,16 +1,9 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include <iostream>
-#include <array>
-
-class Board;
-
-#include "token.h"
-
-#define HEIGHT 9
-#define WIDTH 9
 #define RANGE 9
+#define HEIGHT RANGE
+#define WIDTH RANGE
 
 #define REGION 3
 #define REGIONS WIDTH * HEIGHT / (REGION * REGION)
@@ -19,13 +12,19 @@ class Board;
 
 enum {BLANK, NOT_BLANK};
 
+class Board;
+
+#include <iostream>
+#include <array>
+#include "token.h"
+
 class Board {
     public:
     std::array<std::array<int, WIDTH>, HEIGHT> values;
 
-    std::array<int, HEIGHT> colsPossible = {0};
-    std::array<int, WIDTH> rowsPossible = {0};
-    std::array<int, REGIONS> quadPossible = {0};
+    std::array<int, HEIGHT>  colsPossible = {0};
+    std::array<int, WIDTH>   rowsPossible = {0};
+    std::array<int, REGIONS> regsPossible = {0};
 
     Board();
 

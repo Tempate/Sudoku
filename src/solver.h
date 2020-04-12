@@ -3,20 +3,25 @@
 
 #include "board.h"
 
-void solve(Board &board);
-std::vector<Square> init(Board &board);
-bool dfs(Board &board, const std::vector<Square> &blanks, int index);
+#define UNMODIFIED 0
+#define MODIFIED 1
+#define DEAD_END 2
 
-void updatePossible(Board &board, const Square &sqr);
+#define NO_VALUES_LEFT 0
 
-int nextPossibleValue(const Board &board, Square &sqr, const int current);
-int setForced(Board &board, const std::vector<Square> &blanks, const int index);
+int solve(Board &board, const int flag);
+int dfs(Board &board, std::vector<Token> &blanks, const int n);
 
-int setForcedTile(Board &board, const Square &sqr, const int possible);
+void updatePossible(Board &board, const Token &token);
 
-int setForcedInRow     (Board &board, const Square &sqr);
-int setForcedInColumn  (Board &board, const Square &sqr);
-int setForcedInQuadrant(Board &board, const Square &sqr);
+int nextPossibleValue(const Board &board, Token &token, const int current);
+int setForced(Board &board, std::vector<Token> &blanks);
+
+int setForcedTile(Board &board, const Token &token, const int possible);
+
+int setForcedInRow   (Board &board, const Token &token);
+int setForcedInColumn(Board &board, const Token &token);
+int setForcedInRegion(Board &board, const Token &token);
 
 #endif /* SOLVER_H */
 

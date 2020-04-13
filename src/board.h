@@ -10,9 +10,8 @@
 
 #define MAX (1 << RANGE) - 1
 
-#define NO_VALUES_LEFT 0
-
 enum {BLANK, NOT_BLANK};
+enum {UNMODIFIED, MODIFIED, DEAD_END};
 
 #include <vector>
 #include <array>
@@ -32,13 +31,13 @@ struct Token {
 };
 
 class Board {
-    public:
     std::array<std::array<int, WIDTH>, HEIGHT> values;
 
     std::array<int, HEIGHT>  colsPossible = {0};
     std::array<int, WIDTH>   rowsPossible = {0};
     std::array<int, REGIONS> regsPossible = {0};
 
+    public:
     Board();
 
     Board(const std::array<std::array<int, WIDTH>, HEIGHT> values):
@@ -57,6 +56,13 @@ class Board {
     void updatePossible(const Token &token);
     void setRandomValue(const Token &token);
     int nextPossibleValue(const Token &token, const int value) const;
+
+    int setForced(std::vector<Token> &blanks);
+    int setForcedToken(const Token &token, const int possible);
+
+    int setForcedInRow(const Token &token);
+    int setForcedInCol(const Token &token);
+    int setForcedInReg(const Token &token);
 };
 
 #endif /* BOARD_H */

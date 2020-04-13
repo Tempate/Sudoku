@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "../src/board.h"
-#include "../src/solver.h"
+#include "main.h"
 
 void test_board_complete() {
     static constexpr std::array<std::array<std::array<int, WIDTH>, HEIGHT>, 2> incomplete_board_values = {{

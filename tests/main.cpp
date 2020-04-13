@@ -1,9 +1,9 @@
 #include <iostream>
 #include <chrono>
 
-#include "tests.h"
+#include "main.h"
 
-void benchmark_solver() {
+int main() {
     using namespace std::chrono;
     const auto start = high_resolution_clock::now();
 
@@ -13,4 +13,6 @@ void benchmark_solver() {
     const double elapsed = duration_cast<milliseconds>(current - start).count();
     
     std::cout << "Time: " << (double) elapsed << " ms" << std::endl;
+
+    return EXIT_SUCCESS;
 }

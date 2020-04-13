@@ -8,6 +8,7 @@
 
 #include "../src/board.h"
 #include "../src/solver.h"
+#include "main.h"
 
 std::vector<Board> parse_file(const std::string filename) {
     std::ifstream infile(filename);

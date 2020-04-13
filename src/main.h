@@ -2,8 +2,9 @@
 #define MAIN_H
 
 #include <iostream>
-#include <array>
 #include <cassert>
+#include <vector>
+#include <array>
 
 #define UNLIMITED 0
 
@@ -20,6 +21,22 @@ static inline int fromBinary(int index) {
     
     return val;
 }
+
+static inline std::vector<int> binaryToList(int bin) {
+    std::vector<int> values;
+
+    int v = 1;
+
+    do {
+        if (bin & 1)
+            values.push_back(v);
+
+        v++;
+    } while (bin >>= 1);
+
+    return values;
+}
+
 
 template <typename T>
 T randomPop(std::vector<T> &list) {

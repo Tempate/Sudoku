@@ -10,13 +10,26 @@
 
 #define MAX (1 << RANGE) - 1
 
+#define NO_VALUES_LEFT 0
+
 enum {BLANK, NOT_BLANK};
 
-class Board;
-
-#include <iostream>
+#include <vector>
 #include <array>
-#include "token.h"
+
+static inline int calcRegion(const int x, const int y) {
+    return REGION * (y / REGION) + x / REGION;
+}
+
+struct Token {
+    int x;
+    int y;
+    int z;
+
+    Token(const int x, const int y): x{x}, y{y} {
+        z = calcRegion(x, y);
+    }
+};
 
 class Board {
     public:
@@ -36,11 +49,14 @@ class Board {
     bool check() const;
 
     int getValue(const Token &token) const;
-    void fill(const Token &token, const int value);
+    void setValue(const Token &token, const int value);
     std::vector<Token> getTokens(const int type) const;
     
     void calculatePossible();
+    int getPossible(const Token &token) const;
     void updatePossible(const Token &token);
+    void setRandomValue(const Token &token);
+    int nextPossibleValue(const Token &token, const int value) const;
 };
 
 #endif /* BOARD_H */

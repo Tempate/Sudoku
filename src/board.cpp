@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "main.h"
-#include "token.h"
 #include "board.h"
 
 #define MAX (1 << RANGE) - 1
@@ -89,7 +88,7 @@ int Board::getValue(const Token &token) const {
     return values[token.y][token.x];
 }
 
-void Board::fill(const Token &token, const int value) {
+void Board::setValue(const Token &token, const int value) {
     values[token.y][token.x] = value;
     updatePossible(token);
 }
@@ -135,10 +134,30 @@ void Board::calculatePossible() {
     }
 }
 
+int Board::getPossible(const Token &token) const {
+    return colsPossible[token.x] & rowsPossible[token.y] & regsPossible[token.z];
+}
+
 void Board::updatePossible(const Token &token) {
     const int possible = MAX ^ toBinary(getValue(token));
 
     colsPossible[token.x] &= possible;
     rowsPossible[token.y] &= possible;
     regsPossible[token.z] &= possible;
+}
+
+void Board::setRandomValue(const Token &token) {
+    std::vector<int> possibleValues = binaryToList(getPossible(token));    
+    assert(possibleValues.size() > 0);
+
+    setValue(token, possibleValues[rand() % values.size()]);
+}
+
+int Board::nextPossibleValue(const Token &token, const int value) const {
+    const int possible = getPossible(token) >> value;
+
+    if (!possible)
+        return NO_VALUES_LEFT;
+
+    return value + __builtin_ctz(possible) + 1; 
 }

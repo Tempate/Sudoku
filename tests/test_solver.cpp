@@ -32,7 +32,7 @@ std::vector<Board> parse_file(const std::string filename) {
 }
 
 void test_solver() {
-    const auto boards = parse_file("tests/sudokus.txt");
+    const auto boards = parse_file("../tests/sudokus.txt");
 
     for (auto board : boards) {
         solve(board, 1);

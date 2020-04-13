@@ -12,10 +12,10 @@ Board generateBoard() {
     std::vector<Token> blanks = board.getTokens(BLANK);
     board.calculatePossible();
 
-    // Set a few random values
+    // Set HEIGHT + WIDTH + 1 random values
     while (blanks.size() > (WIDTH - 1) * (HEIGHT - 1)) {
         Token token = randomPop<Token>(blanks);
-        board.fill(token, token.randomValue(board));
+        board.setRandomValue(token);
 
         int state;
 
@@ -25,20 +25,19 @@ Board generateBoard() {
     }
 
     // Solve the board
-    if (solve(board, 1) == 0) {
+    const int solvable = solve(board, 1);
+
+    if (!solvable) {
         std::cout << "[-] The generated Sudoku isn't solvable" << std::endl;
         assert(false);
     }
 
+    // Remove all the forced values
     std::vector<Token> squares = board.getTokens(NOT_BLANK);
 
-    // Removes values until you get multiple solutions
     while (squares.size() > 0) {
-        assert(squares.size() > 0);
-
-        Token token = randomPop<Token>(squares);
         Board newBoard = board;
-        newBoard.fill(token, 0);
+        newBoard.setValue(randomPop<Token>(squares), 0);
         newBoard.calculatePossible();
 
         if (solve(newBoard, 2) == 1)

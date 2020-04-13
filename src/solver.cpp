@@ -25,12 +25,12 @@ int dfs(Board &board, std::vector<Token> &blanks, const int n) {
 
     assert(board.getValue(token) == 0);
     
-    int v = nextPossibleValue(board, token, 0);
+    int v = board.nextPossibleValue(token, 0);
     int count = 0;
     
     while (v != NO_VALUES_LEFT) {
         Board newBoard = board;
-        newBoard.fill(token, v);
+        newBoard.setValue(token, v);
 
         std::vector<Token> newBlanks = blanks;
 
@@ -54,21 +54,10 @@ int dfs(Board &board, std::vector<Token> &blanks, const int n) {
             }
         }
 
-        v = nextPossibleValue(board, token, v);
+        v = board.nextPossibleValue(token, v);
     }
 
     return count;
-}
-
-int nextPossibleValue(const Board &board, Token &token, const int value) {
-    const int possible = token.updatePossible(board);
-
-    for (int k = value + 1; k <= RANGE; k++) {
-        if (possible & toBinary(k))
-            return k;
-    }
-
-    return NO_VALUES_LEFT;
 }
 
 int setForced(Board &board, std::vector<Token> &blanks) {
@@ -78,12 +67,12 @@ int setForced(Board &board, std::vector<Token> &blanks) {
         Token token = blanks[i];
         assert(board.getValue(token) == 0);
 
-        token.updatePossible(board);
+        const int possible = board.getPossible(token);
 
-        if (!token.possible)
+        if (!possible)
             return DEAD_END;
             
-        if ((setForcedTile(board, token, token.possible) == MODIFIED) || 
+        if ((setForcedTile(board, token, possible) == MODIFIED) || 
             (setForcedInRow(board, token)    == MODIFIED) ||
             (setForcedInColumn(board, token) == MODIFIED) ||
             (setForcedInRegion(board, token) == MODIFIED)) {
@@ -99,35 +88,35 @@ int setForcedTile(Board &board, const Token &token, const int possible) {
     if (__builtin_popcount(possible) != 1)    
         return UNMODIFIED;
 
-    board.fill(token, fromBinary(possible));
+    board.setValue(token, fromBinary(possible));
 
     return MODIFIED;
 }
 
 int setForcedInRow(Board &board, const Token &token) {
-    int possible = token.possible;
+    int possible = board.getPossible(token);
 
     for (int x = 0; x < WIDTH; x++) {
         if (board.values[token.y][x] == 0 && x != token.x)
-            possible &= MAX ^ Token{board, x, token.y}.possible;
+            possible &= MAX ^ board.getPossible(Token{x, token.y});
     }
 
     return setForcedTile(board, token, possible);
 }
 
 int setForcedInColumn(Board &board, const Token &token) {
-    int possible = token.possible;
+    int possible = board.getPossible(token);
 
     for (int y = 0; y < HEIGHT; y++) {
         if (board.values[y][token.x] == 0 && y != token.y)
-            possible &= MAX ^ Token{board, token.x, y}.possible;
+            possible &= MAX ^ board.getPossible(Token{token.x, y});
     }
 
     return setForcedTile(board, token, possible);
 }
 
 int setForcedInRegion(Board &board, const Token &token) {
-    int possible = token.possible;
+    int possible = board.getPossible(token);
 
     const int y0 = 3 * (token.y / 3);
     const int x0 = 3 * (token.x / 3);
@@ -135,7 +124,7 @@ int setForcedInRegion(Board &board, const Token &token) {
     for (int y = y0; y < y0 + 3; y++) {
         for (int x = x0; x < x0 + 3; x++) {
             if (board.values[y][x] == 0 && !(x == token.x && y == token.y))
-                possible &= MAX ^ Token{board, x, y}.possible;
+                possible &= MAX ^ board.getPossible(Token{x, y});
         }
     }
 

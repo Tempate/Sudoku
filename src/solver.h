@@ -14,7 +14,6 @@ int dfs(Board &board, std::vector<Token> &blanks, const int n);
 
 void updatePossible(Board &board, const Token &token);
 
-int nextPossibleValue(const Board &board, Token &token, const int current);
 int setForced(Board &board, std::vector<Token> &blanks);
 
 int setForcedTile(Board &board, const Token &token, const int possible);

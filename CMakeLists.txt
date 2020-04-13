@@ -23,16 +23,12 @@ add_executable(
     main
     src/main.cpp
     src/board.cpp
-    src/solver.cpp
-    src/generator.cpp
 )
 
 # Add the test executable
 add_executable(
     tests
     src/board.cpp
-    src/solver.cpp
-    src/generator.cpp
     tests/main.cpp
     tests/test_checker.cpp
     tests/test_solver.cpp

@@ -9,7 +9,7 @@
 int main() {
     srand(time(NULL));
 
-    Board board = generateBoard();
+    Board board = generateSudoku<Board>();
     board.print();
 
     return EXIT_SUCCESS;

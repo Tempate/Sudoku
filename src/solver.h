@@ -1,26 +1,66 @@
 #ifndef SOLVER_H
 #define SOLVER_H
 
+#include <vector>
+
+#include "main.h"
 #include "board.h"
 
-#define UNMODIFIED 0
-#define MODIFIED 1
-#define DEAD_END 2
+template <typename Board>
+int dfs(Board &board, std::vector<Token> &blanks, const int maxSolutions) {
+    if (blanks.size() == 0) {
+        assert(board.check());
+        return 1;
+    }
+    
+    Token token = popLast<Token>(blanks);
 
-#define NO_VALUES_LEFT 0
+    assert(board.getValue(token) == 0);
+    
+    int value = board.nextPossibleValue(token, 0);
+    int count = 0;
+    
+    while (value != UNMODIFIED) {
+        Board newBoard = board;
+        newBoard.setValue(token, value);
 
-int solve(Board &board, const int flag);
-int dfs(Board &board, std::vector<Token> &blanks, const int n);
+        std::vector<Token> newBlanks = blanks;
 
-void updatePossible(Board &board, const Token &token);
+        assert(board.getValue(token) == 0);
+        assert(newBoard.getValue(token) != 0);
+        
+        int state;
 
-int setForced(Board &board, std::vector<Token> &blanks);
+        do {
+            state = newBoard.setForced(newBlanks);
+        } while (state == MODIFIED);
 
-int setForcedTile(Board &board, const Token &token, const int possible);
+        if (state != DEAD_END) {
+            count += dfs<Board>(newBoard, newBlanks, maxSolutions);
 
-int setForcedInRow   (Board &board, const Token &token);
-int setForcedInColumn(Board &board, const Token &token);
-int setForcedInRegion(Board &board, const Token &token);
+            if (count >= maxSolutions) {
+                if (maxSolutions == 1)
+                    board = newBoard;
+                
+                return count;
+            }
+        }
+
+        value = board.nextPossibleValue(token, value);
+    }
+
+    return count;
+}
+
+template <typename Board>
+int solve(Board &board, const int flag) {
+    const int maxSolutions = (flag == UNLIMITED) ? std::numeric_limits<int>::max() : flag;
+
+    std::vector<Token> blanks = board.getTokens(BLANK);
+    board.calculatePossible();
+
+    return dfs<Board>(board, blanks, maxSolutions);
+}
 
 #endif /* SOLVER_H */
 

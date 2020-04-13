@@ -22,7 +22,7 @@ std::vector<Board> parse_file(const std::string filename) {
 
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++, i++)
-                board.values[y][x] = (line[i] == '.') ? 0 : line[i] - '0';
+                board.setValue(Token{x, y}, (line[i] == '.') ? 0 : line[i] - '0');
         }
 
         boards.push_back(board);
@@ -35,7 +35,7 @@ void test_solver() {
     const auto boards = parse_file("../tests/sudokus.txt");
 
     for (auto board : boards) {
-        solve(board, 1);
+        solve<Board>(board, 1);
         assert(board.check());
     }
 

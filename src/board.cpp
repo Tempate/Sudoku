@@ -2,6 +2,7 @@
 #include <cassert>
 #include <array>
 #include <vector>
+#include <string>
 
 #include "main.h"
 #include "board.h"
@@ -13,21 +14,18 @@ Board::Board() {
         values[y] = {0};
 }
 
-void Board::print() const {
-    std::cout << std::endl;
+std::ostream& operator<<(std::ostream& os, const Board &board) {
+    os << "\n";
 
-    for (const auto row : values) {
-        for (const int token : row) {
-            if (token == 0)
-                std::cout << " .";
-            else
-                std::cout << " " << token;
-        }
+    for (const auto row : board.values) {
+        for (const int value : row)
+            os << " " << ((value == 0) ? "." : std::to_string(value));
 
-        std::cout << std::endl;
+        os << "\n";
     }
 
-    std::cout << std::endl;
+    os << "\n";
+    return os;
 }
 
 bool Board::complete() const {

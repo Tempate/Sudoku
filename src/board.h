@@ -37,13 +37,14 @@ class Board {
     std::array<int, WIDTH>   rowsPossible = {0};
     std::array<int, REGIONS> regsPossible = {0};
 
+    friend std::ostream& operator<<(std::ostream& os, const Board &board);
+
     public:
     Board();
 
     Board(const std::array<std::array<int, WIDTH>, HEIGHT> values):
     values{values} {};
 
-    void print() const;
     bool complete() const;
     bool check() const;
 

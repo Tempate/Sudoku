@@ -10,7 +10,7 @@ int main() {
     srand(time(NULL));
 
     Board board = generateSudoku<Board>();
-    board.print();
+    std::cout << board;
 
     return EXIT_SUCCESS;
 }

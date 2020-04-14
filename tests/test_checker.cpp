@@ -3,7 +3,7 @@
 #include <array>
 #include <vector>
 
-#include "../src/board.h"
+#include "../src/boards/standard.h"
 #include "main.h"
 
 void test_board_complete() {
@@ -56,12 +56,12 @@ void test_board_complete() {
     }};
 
     for (const auto value : incomplete_board_values) {
-        Board board{value};
+        StandardBoard board{value};
         assert(!board.complete());
     }
 
     for (const auto value : complete_board_values) {
-        Board board{value};
+        StandardBoard board{value};
         assert(board.complete());
     }
 }
@@ -116,14 +116,12 @@ void test_board_check() {
     }};
 
     for (const auto value : wrong_board_values) {
-        Board board{value};
-        assert(board.complete());
-        assert(!board.check());
+        StandardBoard board{value};
+        assert(!board.solved());
     }
 
     for (const auto value : right_board_values) {
-        Board board{value};
-        assert(board.complete());
-        assert(board.check());
+        StandardBoard board{value};
+        assert(board.solved());
     }
 }

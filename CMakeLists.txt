@@ -23,12 +23,14 @@ add_executable(
     main
     src/main.cpp
     src/board.cpp
+    src/boards/standard.cpp
 )
 
 # Add the test executable
 add_executable(
     tests
     src/board.cpp
+    src/boards/standard.cpp
     tests/main.cpp
     tests/test_checker.cpp
     tests/test_solver.cpp

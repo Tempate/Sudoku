@@ -14,24 +14,10 @@ Board::Board() {
         values[y] = {0};
 }
 
-std::ostream& operator<<(std::ostream& os, const Board &board) {
-    os << "\n";
-
-    for (const auto row : board.values) {
-        for (const int value : row)
-            os << " " << ((value == 0) ? "." : std::to_string(value));
-
-        os << "\n";
-    }
-
-    os << "\n";
-    return os;
-}
-
 bool Board::complete() const {
-    for (const auto row : values) {
-        for (const int token : row) {
-            if (token <= 0 || token > RANGE)
+    for (const auto &row : values) {
+        for (const int value : row) {
+            if (!(value > 0 && value <= RANGE))
                 return false;
         }
     }
@@ -39,43 +25,55 @@ bool Board::complete() const {
     return true;
 }
 
-bool Board::check() const {
-    assert(complete());
-
-    // Ensure rows have an iteration of numbers from 1 to 9
-    for (int j = 0; j < HEIGHT; j++) {
-        int numbers = 0;
+bool Board::checkRow() const {
+    for (int y = 0; y < HEIGHT; y++) {
+        int row = 0;
         
-        for (int i = 0; i < WIDTH; i++)
-            numbers ^= toBinary(values[j][i]);
+        for (int x = 0; x < WIDTH; x++) {
+            const int bin = toBinary(values[y][x]);
 
-        if (numbers != MAX)
-            return false;
-    }
-
-    // Ensure columns have an iteration of numbers from 1 to 9
-    for (int i = 0; i < WIDTH; i++) {
-        int numbers = 0;
-        
-        for (int j = 0; j < HEIGHT; j++)
-            numbers ^= toBinary(values[j][i]);
-
-        if (numbers != MAX)
-            return false;
-    }
-
-    // Ensure quadrants have an iteration of numbers from 1 to 9
-    for (int i = 0; i < HEIGHT / REGION; i += REGION) {
-        for (int j = 0; j < WIDTH / REGION; j += REGION) {
-            int numbers = 0;
-
-            for (int k = i; k < i + REGION; k++) {
-                for (int l = j; l < j + REGION; l++)
-                    numbers ^= toBinary(values[k][l]);
-            }
-
-            if (numbers != MAX)
+            if (bin & row)
                 return false;
+
+            row ^= bin;
+        }
+    }
+
+    return true;
+}
+
+bool Board::checkCol() const {
+    for (int x = 0; x < WIDTH; x++) {
+        int col = 0;
+        
+        for (int y = 0; y < HEIGHT; y++) {
+            const int bin = toBinary(values[y][x]);
+
+            if (bin & col)
+                return false;
+
+            col ^= bin;
+        }
+    }
+
+    return true;
+}
+
+bool Board::checkReg() const {
+    for (int y = 0; y < HEIGHT / REGION; y += REGION) {
+        for (int x = 0; x < WIDTH / REGION; x += REGION) {
+            int reg = 0;
+
+            for (int j = y; j < y + REGION; j++) {
+                for (int i = x; i < x + REGION; i++) {
+                    const int bin = toBinary(values[j][i]);
+
+                    if (bin & reg)
+                        return false;
+
+                    reg ^= bin;
+                }
+            }
         }
     }
 
@@ -107,43 +105,6 @@ std::vector<Token> Board::getTokens(const int type) const {
     return squares;
 }
 
-void Board::calculatePossible() {
-    for (int i = 0; i < WIDTH; i++)
-        colsPossible[i] = MAX;
-
-    for (int i = 0; i < HEIGHT; i++)
-        rowsPossible[i] = MAX;
-
-    for (int i = 0; i < REGIONS; i++)
-        regsPossible[i] = MAX;
-
-    // Saves values that aren't possible for each row, column and quadrant
-    for (int y = 0; y < HEIGHT; y++) {
-        for (int x = 0; x < WIDTH; x++) {
-            if (values[y][x] != 0) {
-                const int bin = toBinary(values[y][x]);
-                const Token token{x, y};
-
-                colsPossible[token.x] ^= bin;
-                rowsPossible[token.y] ^= bin;
-                regsPossible[token.z] ^= bin;
-            }
-        }
-    }
-}
-
-int Board::getPossible(const Token &token) const {
-    return colsPossible[token.x] & rowsPossible[token.y] & regsPossible[token.z];
-}
-
-void Board::updatePossible(const Token &token) {
-    const int possible = MAX ^ toBinary(getValue(token));
-
-    colsPossible[token.x] &= possible;
-    rowsPossible[token.y] &= possible;
-    regsPossible[token.z] &= possible;
-}
-
 void Board::setRandomValue(const Token &token) {
     std::vector<int> possibleValues = binaryToList(getPossible(token));    
     assert(possibleValues.size() > 0);
@@ -158,30 +119,6 @@ int Board::nextPossibleValue(const Token &token, const int value) const {
         return UNMODIFIED;
 
     return value + __builtin_ctz(possible) + 1; 
-}
-
-int Board::setForced(std::vector<Token> &blanks) {
-    int state = UNMODIFIED;
-    
-    for (int i = blanks.size() - 1; i >= 0; i--) {
-        Token token = blanks[i];
-        assert(getValue(token) == 0);
-
-        const int possible = getPossible(token);
-
-        if (!possible)
-            return DEAD_END;
-            
-        if ((setForcedToken(token, possible) == MODIFIED) || 
-            (setForcedInRow(token) == MODIFIED) ||
-            (setForcedInCol(token) == MODIFIED) ||
-            (setForcedInReg(token) == MODIFIED)) {
-            blanks.erase(blanks.begin() + i);
-            state = MODIFIED;
-        }
-    }
-
-    return state;
 }
 
 int Board::setForcedToken(const Token &token, const int possible) {

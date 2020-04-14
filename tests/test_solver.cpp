@@ -6,18 +6,18 @@
 #include <array>
 #include <vector>
 
-#include "../src/board.h"
+#include "../src/boards/standard.h"
 #include "../src/solver.h"
 #include "main.h"
 
-std::vector<Board> parse_file(const std::string filename) {
+std::vector<StandardBoard> parse_file(const std::string filename) {
     std::ifstream infile(filename);
-    std::vector<Board> boards;
+    std::vector<StandardBoard> boards;
 
     std::string line;
 
     while (std::getline(infile, line)) {
-        Board board;
+        StandardBoard board;
         int i = 0;
 
         for (int y = 0; y < HEIGHT; y++) {
@@ -35,8 +35,8 @@ void test_solver() {
     const auto boards = parse_file("../tests/sudokus.txt");
 
     for (auto board : boards) {
-        solve<Board>(board, 1);
-        assert(board.check());
+        solve<StandardBoard>(board, 1);
+        assert(board.solved());
     }
 
     std::cout << "[+] Successfully solved " << boards.size() << " sudokus" << std::endl;

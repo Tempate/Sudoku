@@ -1,15 +1,13 @@
 #include <iostream>
-#include <chrono>
-#include <ctime>
 
 #include "main.h"
-#include "board.h"
+#include "boards/standard.h"
 #include "generator.h"
 
 int main() {
     srand(time(NULL));
 
-    Board board = generateSudoku<Board>();
+    StandardBoard board = generateSudoku<StandardBoard>();
     std::cout << board;
 
     return EXIT_SUCCESS;

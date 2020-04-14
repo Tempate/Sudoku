@@ -9,7 +9,7 @@
 template <typename Board>
 int dfs(Board &board, std::vector<Token> &blanks, const int maxSolutions) {
     if (blanks.size() == 0) {
-        assert(board.check());
+        assert(board.solved());
         return 1;
     }
     
@@ -39,8 +39,10 @@ int dfs(Board &board, std::vector<Token> &blanks, const int maxSolutions) {
             count += dfs<Board>(newBoard, newBlanks, maxSolutions);
 
             if (count >= maxSolutions) {
-                if (maxSolutions == 1)
+                if (maxSolutions == 1) {
+                    assert(newBoard.solved());
                     board = newBoard;
+                }
                 
                 return count;
             }

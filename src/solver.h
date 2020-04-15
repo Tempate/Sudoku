@@ -61,6 +61,8 @@ int solve(Board &board, const int flag) {
     std::vector<Token> blanks = board.getTokens(BLANK);
     board.calculatePossible();
 
+    while (board.setForced(blanks) == MODIFIED);
+
     return dfs<Board>(board, blanks, maxSolutions);
 }
 

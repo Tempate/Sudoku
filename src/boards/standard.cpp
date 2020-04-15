@@ -7,8 +7,18 @@ std::ostream& operator<<(std::ostream& os, const StandardBoard &board) {
     os << "\n";
 
     for (const auto row : board.values) {
-        for (const int value : row)
-            os << " " << ((value == 0) ? "." : std::to_string(value));
+        for (const int value : row) {
+            assert(value >= 0 && value <= RANGE);
+            if (value == 0) {
+                const char size = RANGE / 10 + 1;
+                const std::string blanks(size, ' ');
+                os << blanks << ".";
+            } else {
+                const char size = 1 + RANGE / 10 - value / 10;
+                const std::string blanks(size, ' ');
+                os << blanks << value;
+            }
+        }
 
         os << "\n";
     }

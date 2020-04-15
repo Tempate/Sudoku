@@ -155,11 +155,11 @@ int Board::setForcedInCol(const Token &token) {
 int Board::setForcedInReg(const Token &token) {
     int possible = getPossible(token);
 
-    const int y0 = 3 * (token.y / 3);
-    const int x0 = 3 * (token.x / 3);
+    const int y0 = REGION * (token.y / REGION);
+    const int x0 = REGION * (token.x / REGION);
 
-    for (int y = y0; y < y0 + 3; y++) {
-        for (int x = x0; x < x0 + 3; x++) {
+    for (int y = y0; y < y0 + REGION; y++) {
+        for (int x = x0; x < x0 + REGION; x++) {
             if (values[y][x] == 0 && !(x == token.x && y == token.y))
                 possible &= MAX ^ getPossible(Token{x, y});
         }

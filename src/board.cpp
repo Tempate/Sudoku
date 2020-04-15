@@ -126,13 +126,21 @@ int Board::setForcedToken(const Token &token, const int possible) {
         return UNMODIFIED;
 
     setValue(token, fromBinary(possible));
+    updatePossible(token);
 
     return MODIFIED;
 }
 
-int Board::setForcedInRow(const Token &token) {
-    int possible = getPossible(token);
+int Board::setForcedInCol(const Token &token, int possible) {
+    for (int y = 0; y < HEIGHT; y++) {
+        if (values[y][token.x] == 0 && y != token.y)
+            possible &= MAX ^ getPossible(Token{token.x, y});
+    }
+    
+    return setForcedToken(token, possible);
+}
 
+int Board::setForcedInRow(const Token &token, int possible) {
     for (int x = 0; x < WIDTH; x++) {
         if (values[token.y][x] == 0 && x != token.x)
             possible &= MAX ^ getPossible(Token{x, token.y});
@@ -141,20 +149,7 @@ int Board::setForcedInRow(const Token &token) {
     return setForcedToken(token, possible);
 }
 
-int Board::setForcedInCol(const Token &token) {
-    int possible = getPossible(token);
-
-    for (int y = 0; y < HEIGHT; y++) {
-        if (values[y][token.x] == 0 && y != token.y)
-            possible &= MAX ^ getPossible(Token{token.x, y});
-    }
-
-    return setForcedToken(token, possible);
-}
-
-int Board::setForcedInReg(const Token &token) {
-    int possible = getPossible(token);
-
+int Board::setForcedInReg(const Token &token, int possible) {
     const int y0 = REGION * (token.y / REGION);
     const int x0 = REGION * (token.x / REGION);
 
@@ -164,6 +159,6 @@ int Board::setForcedInReg(const Token &token) {
                 possible &= MAX ^ getPossible(Token{x, y});
         }
     }
-
+    
     return setForcedToken(token, possible);
 }

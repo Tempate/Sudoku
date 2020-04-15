@@ -6,7 +6,7 @@
 std::ostream& operator<<(std::ostream& os, const StandardBoard &board) {
     os << "\n";
 
-    for (const auto row : board.values) {
+    for (const auto &row : board.values) {
         for (const int value : row) {
             assert(value >= 0 && value <= RANGE);
             if (value == 0) {
@@ -47,13 +47,14 @@ void StandardBoard::calculatePossible() {
         for (int x = 0; x < WIDTH; x++) {
             const Token token{x, y};
 
-            if (getValue(token) != 0) {
-                const int bin = toBinary(getValue(token));
+            if (getValue(token) == 0)
+                continue;
 
-                colsPossible[token.x] ^= bin;
-                rowsPossible[token.y] ^= bin;
-                regsPossible[token.z] ^= bin;
-            }
+            const int bin = toBinary(getValue(token));
+
+            colsPossible[token.x] ^= bin;
+            rowsPossible[token.y] ^= bin;
+            regsPossible[token.z] ^= bin;
         }
     }
 }
@@ -70,18 +71,18 @@ int StandardBoard::setForced(std::vector<Token> &blanks) {
     int state = UNMODIFIED;
     
     for (int i = blanks.size() - 1; i >= 0; i--) {
-        Token token = blanks[i];
+        const Token &token = blanks[i];
         assert(getValue(token) == 0);
 
         const int possible = getPossible(token);
 
         if (!possible)
             return DEAD_END;
-            
-        if ((setForcedToken(token, possible) == MODIFIED) || 
-            (setForcedInRow(token) == MODIFIED) ||
-            (setForcedInCol(token) == MODIFIED) ||
-            (setForcedInReg(token) == MODIFIED)) {
+
+        if (setForcedToken(token, possible) == MODIFIED ||
+            setForcedInCol(token, possible) == MODIFIED ||
+            setForcedInRow(token, possible) == MODIFIED ||
+            setForcedInReg(token, possible) == MODIFIED) {
             blanks.erase(blanks.begin() + i);
             state = MODIFIED;
         }

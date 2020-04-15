@@ -57,11 +57,11 @@ class Board {
     int nextPossibleValue(const Token &token, const int value) const;
 
     virtual int setForced(std::vector<Token> &blanks) = 0;
-    int setForcedToken(const Token &token, const int possible);
 
-    int setForcedInRow(const Token &token);
-    int setForcedInCol(const Token &token);
-    int setForcedInReg(const Token &token);
+    int setForcedToken(const Token &token, const int possible);
+    int setForcedInCol(const Token &token, int possible);
+    int setForcedInRow(const Token &token, int possible);
+    int setForcedInReg(const Token &token, int possible);
 };
 
 #endif /* BOARD_H */

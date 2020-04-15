@@ -27,9 +27,11 @@ std::vector<StandardBoard> parseFile(const std::string filename) {
 
         for (int y = 0; y < HEIGHT; y++) {
             for (int x = 0; x < WIDTH; x++, i++) {
-                int value = 0;
+                int value;
                 
-                if (line[i] >= '1' && line[i] <= '9')
+                if (line[i] == '.')
+                    value = 0;
+                else if (line[i] >= '0' && line[i] <= '9')
                     value = line[i] - '0';
                 else if (line[i] >= 'A' && line[i] <= 'Z')
                     value = line[i] - 'A' + 10;
@@ -47,12 +49,10 @@ std::vector<StandardBoard> parseFile(const std::string filename) {
 }
 
 void test_solver() {
-    const auto boards = parseFile(genFilename());
+    auto boards = parseFile(genFilename());
 
-    for (auto board : boards) {
-        //std::cout << board;
+    for (auto &board : boards) {
         solve<StandardBoard>(board, 1);
-        //std::cout << board;
         assert(board.solved());
     }
 

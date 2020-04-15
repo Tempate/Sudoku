@@ -10,7 +10,7 @@ include_directories(.)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -flto -march=native")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -flto -march=native -mpopcnt")
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 
 # Default build type

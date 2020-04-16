@@ -3,6 +3,44 @@
 #include "standard.h"
 
 
+StandardBoard::StandardBoard(const std::string &fen) {
+    int i = 0;
+
+    for (int y = 0; y < HEIGHT; y++) {
+        for (int x = 0; x < WIDTH; x++, i++) {
+            int value;
+            
+            if (fen[i] == '.')
+                value = 0;
+            else if (fen[i] >= '0' && fen[i] <= '9')
+                value = fen[i] - '0';
+            else if (fen[i] >= 'A' && fen[i] <= 'Z')
+                value = fen[i] - 'A' + 10;
+            else if (fen[i] >= 'a' && fen[i] <= 'z')
+                value = fen[i] - 'a' + 10;
+            
+            setValue(Token{x, y}, value);
+        }
+    }
+}
+
+std::string StandardBoard::toString() const {
+    std::string fen;
+    
+    for (int y = 0; y < HEIGHT; y++) {
+        for (int x = 0; x < WIDTH; x++) {
+            const int value = getValue(Token{x, y});
+
+            if (value == 0)
+                fen += ".";
+            else
+                fen += std::to_string(value);
+        }
+    }
+
+    return fen;
+}
+
 std::ostream& operator<<(std::ostream& os, const StandardBoard &board) {
     os << "\n";
 
@@ -31,7 +69,7 @@ bool StandardBoard::solved() const {
     return complete() && checkRow() && checkCol() && checkReg();
 }
 
-int StandardBoard::getPossible(const Token &token) const {
+inline int StandardBoard::getPossible(const Token &token) const {
     return colsPossible[token.x] & rowsPossible[token.y] & regsPossible[token.z];
 }
 
@@ -79,12 +117,38 @@ int StandardBoard::setForced(std::vector<Token> &blanks) {
         if (!possible)
             return DEAD_END;
 
-        if (setForcedToken(token, possible) == MODIFIED ||
-            setForcedInCol(token, possible) == MODIFIED ||
-            setForcedInRow(token, possible) == MODIFIED ||
-            setForcedInReg(token, possible) == MODIFIED) {
+
+        if (setForcedToken(token, possible) == MODIFIED) {
             blanks.erase(blanks.begin() + i);
             state = MODIFIED;
+            continue;
+        }
+
+        switch (setForcedInCol(token, possible)) {
+            case MODIFIED:
+                blanks.erase(blanks.begin() + i);
+                state = MODIFIED;
+                continue;
+            case DEAD_END:
+                return DEAD_END;
+        }
+
+        switch (setForcedInRow(token, possible)) {
+            case MODIFIED:
+                blanks.erase(blanks.begin() + i);
+                state = MODIFIED;
+                continue;
+            case DEAD_END:
+                return DEAD_END;
+        }
+
+        switch (setForcedInReg(token, possible)) {
+            case MODIFIED:
+                blanks.erase(blanks.begin() + i);
+                state = MODIFIED;
+                continue;
+            case DEAD_END:
+                return DEAD_END;
         }
     }
 

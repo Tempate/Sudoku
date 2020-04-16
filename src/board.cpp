@@ -126,9 +126,26 @@ int Board::setForcedToken(const Token &token, const int possible) {
         return UNMODIFIED;
 
     setValue(token, fromBinary(possible));
-    updatePossible(token);
 
     return MODIFIED;
+}
+
+int Board::setOnlyPossible(const Token &token, const int possible) {
+    int state;
+
+    switch (__builtin_popcount(possible)) {
+    case 0:
+        state = UNMODIFIED;
+        break;
+    case 1:
+        setValue(token, fromBinary(possible));
+        state = MODIFIED;
+        break;
+    default:
+        state = DEAD_END;
+    }
+    
+    return state;
 }
 
 int Board::setForcedInCol(const Token &token, int possible) {
@@ -136,8 +153,8 @@ int Board::setForcedInCol(const Token &token, int possible) {
         if (values[y][token.x] == 0 && y != token.y)
             possible &= MAX ^ getPossible(Token{token.x, y});
     }
-    
-    return setForcedToken(token, possible);
+
+    return setOnlyPossible(token, possible);
 }
 
 int Board::setForcedInRow(const Token &token, int possible) {
@@ -145,8 +162,8 @@ int Board::setForcedInRow(const Token &token, int possible) {
         if (values[token.y][x] == 0 && x != token.x)
             possible &= MAX ^ getPossible(Token{x, token.y});
     }
-
-    return setForcedToken(token, possible);
+    
+    return setOnlyPossible(token, possible);
 }
 
 int Board::setForcedInReg(const Token &token, int possible) {
@@ -160,5 +177,5 @@ int Board::setForcedInReg(const Token &token, int possible) {
         }
     }
     
-    return setForcedToken(token, possible);
+    return setOnlyPossible(token, possible);
 }

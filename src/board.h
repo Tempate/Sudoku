@@ -38,6 +38,8 @@ class Board {
     Board();
     Board(const std::array<std::array<int, WIDTH>, HEIGHT> values):
     values{values} {};
+
+    virtual std::string toString() const = 0;
     
     virtual bool solved() const = 0;
     bool complete() const;
@@ -45,7 +47,7 @@ class Board {
     bool checkCol() const;
     bool checkReg() const;
 
-    virtual int getPossible(const Token &token) const = 0;
+    virtual inline int getPossible(const Token &token) const = 0;
     virtual void calculatePossible() = 0;
     virtual void updatePossible(const Token &token) = 0;
 
@@ -59,6 +61,8 @@ class Board {
     virtual int setForced(std::vector<Token> &blanks) = 0;
 
     int setForcedToken(const Token &token, const int possible);
+
+    int setOnlyPossible(const Token &token, int possible);
     int setForcedInCol(const Token &token, int possible);
     int setForcedInRow(const Token &token, int possible);
     int setForcedInReg(const Token &token, int possible);

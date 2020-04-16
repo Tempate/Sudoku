@@ -1,5 +1,6 @@
-#include <array>
 #include <iostream>
+#include <string>
+#include <array>
 
 #include "../board.h"
 
@@ -12,10 +13,13 @@ class StandardBoard: public Board {
 
     public:
     using Board::Board;
+    StandardBoard(const std::string &fen);
+
+    std::string toString() const override;
 
     bool solved() const override;
 
-    int getPossible(const Token &token) const override;
+    inline int getPossible(const Token &token) const override;
     void calculatePossible() override;
     void updatePossible(const Token &token) override;
 

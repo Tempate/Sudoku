@@ -2,10 +2,10 @@
 #define BOARD_H
 
 #define RANGE 9
-#define HEIGHT RANGE
-#define WIDTH RANGE
-
 #define REGION 3
+
+#define WIDTH   RANGE
+#define HEIGHT  RANGE
 #define REGIONS RANGE
 
 #define MAX (1 << RANGE) - 1

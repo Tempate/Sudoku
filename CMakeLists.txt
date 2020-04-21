@@ -28,7 +28,7 @@ add_executable(
 
 # Add the test executable
 add_executable(
-    tests
+    test
     src/board.cpp
     src/boards/standard.cpp
     tests/main.cpp

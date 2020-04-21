@@ -12,7 +12,7 @@
 
 std::string genFilename() {
     const std::string size = std::to_string(RANGE);
-    return "../tests/sudokus/" + size + "x" + size + ".txt";
+    return "../tests/sudokus/standard/" + size + "x" + size + ".txt";
 }
 
 std::vector<StandardBoard> parseFile(const std::string filename) {

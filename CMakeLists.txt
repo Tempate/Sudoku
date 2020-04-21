@@ -36,4 +36,4 @@ add_executable(
     tests/test_solver.cpp
 )
 
-set_property(TARGET tests PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE FALSE)
+set_property(TARGET test PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE FALSE)
